@@ -1,5 +1,0 @@
-Se requiere instalar el modulo de React para que funcione el proyecto.
-
-npm install (desde la carpeta que se creo el proyecto)
-
-y tambien, si da un error de instalacion. hay que tener previamente instalado Node.js Instalado!
