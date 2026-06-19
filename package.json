@@ -1,36 +1,26 @@
 {
   "name": "proyecto-react-typescript_frontend",
   "version": "1.0.0",
-  "description": "*Contexto para la tercera etapa (Intranet React + TypeScript)*\r Frenesí Papelería necesita una herramienta de gestión interna que permita a la dueña administrar el inventario, procesar pedidos, atender consultas y gestionar usuarios de forma centralizada y ágil. Actualmente, estas tareas se realizan manualmente (revisión de mensajes, actualización de stock en archivos externos), lo que genera demoras, errores y sobrecarga de trabajo. La intranet propuesta automatizará estos procesos y dará trazabilidad a las operaciones del negocio, conectando directamente con los datos generados por el sitio web público (carrito de compras y formulario de contacto).",
-  "main": "next.config.js",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Mhavra/Proyecto-React-Typescript_FrontEnd.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/Mhavra/Proyecto-React-Typescript_FrontEnd/issues"
-  },
-  "homepage": "https://github.com/Mhavra/Proyecto-React-Typescript_FrontEnd#readme",
   "dependencies": {
-    "next": "^16.2.9",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "next": "14.2.3",
+    "typescript": "^5.4.5",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "bootstrap": "^5.3.3",
+    "bootstrap-icons": "^1.11.3"
   },
   "devDependencies": {
-    "@types/node": "^25.9.3",
-    "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.2.3",
-    "@typescript-eslint/eslint-plugin": "^8.61.1",
-    "@typescript-eslint/parser": "^8.61.1",
-    "eslint": "^9.39.4",
-    "eslint-config-next": "^16.2.9",
-    "typescript": "^6.0.3"
+    "@types/node": "^20.12.8",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "14.2.3"
   }
 }
