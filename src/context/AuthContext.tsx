@@ -47,7 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    * Cargar sesión desde localStorage al montar el componente
    */
   useEffect(() => {
-    const session = storage.getItemById<{ userId: number }>(STORAGE_KEYS.SESSION, 1);
+    const session = storage.getItemById<{ id: number; userId: number }>(STORAGE_KEYS.SESSION, 1);
     if (session) {
       const users = storage.get<Usuario>(STORAGE_KEYS.USUARIOS);
       const foundUser = users.find(u => u.id === session.userId);
@@ -87,11 +87,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    * Cerrar sesión
    */
   const logout = () => {
+    const currentUserId = user?.id;
     setUser(null);
     setIsAuthenticated(false);
-    const items = storage.get<{ userId: number }>(STORAGE_KEYS.SESSION);
-    const filtered = items.filter(item => item.id !== 1);
-    storage.setItem(STORAGE_KEYS.SESSION, filtered);
+    if (currentUserId !== undefined) {
+      const items = storage.get<{ id: number; userId: number }>(STORAGE_KEYS.SESSION);
+      const filtered = items.filter(item => item.userId !== currentUserId);
+      storage.setItem(STORAGE_KEYS.SESSION, filtered);
+    }
   };
 
   if (loading) {

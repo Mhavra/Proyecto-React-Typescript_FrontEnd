@@ -9,7 +9,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { FormEvent, useState, useEffect } from 'react';
 import { Producto } from '@/interfaces';
 
 interface ProductoFormProps {
@@ -19,13 +19,13 @@ interface ProductoFormProps {
 }
 
 export default function ProductoForm({ producto, onSave, onCancel }: ProductoFormProps) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<Omit<Producto, 'id'>>({
     nombre: '',
     categoria: '',
     precio: 0,
     imagen: '',
     descripcion: '',
-    cantidad: 0,
+    stock: 0,
   });
 
   // Cargar datos si es edición
@@ -37,7 +37,7 @@ export default function ProductoForm({ producto, onSave, onCancel }: ProductoFor
         precio: producto.precio,
         imagen: producto.imagen,
         descripcion: producto.descripcion,
-        cantidad: producto.cantidad,
+        stock: producto.stock,
       });
     }
   }, [producto]);
@@ -45,7 +45,7 @@ export default function ProductoForm({ producto, onSave, onCancel }: ProductoFor
   /**
    * Maneja el envío del formulario
    */
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     onSave(formData);
   };
@@ -93,8 +93,8 @@ export default function ProductoForm({ producto, onSave, onCancel }: ProductoFor
             type="number"
             className="form-control"
             placeholder="0"
-            value={formData.cantidad}
-            onChange={(e) => setFormData({ ...formData, cantidad: Number(e.target.value) })}
+            value={formData.stock}
+            onChange={(e) => setFormData({ ...formData, stock: Number(e.target.value) })}
             required
             min="0"
           />
