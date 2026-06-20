@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 import Header from '@/components/common/Header';
 import Footer from '@/components/common/Footer';
 import { storage, STORAGE_KEYS } from '@/services/localStorageService';
@@ -100,7 +100,7 @@ export default function TiendaPage() {
             <div className="container position-relative">
               <p className="hero-subtitle">Papelería Vintage</p>
               <h1 className="hero-title">Detalles que inspiran</h1>
-              <a href="#promoVintage" className="hero-btn">Retro/Vintage</a>
+            <Link to="#promoVintage" className="hero-btn">Retro/Vintage</Link>
             </div>
           </section>
         </div>
@@ -112,7 +112,7 @@ export default function TiendaPage() {
         {renderCarousel(nuevosProducts, 'carouselNuevos', 'Nuevos Productos', 'Productos recién agregados')}
 
         <div className="container text-center mt-0 mb-4">
-          <Link href="/novedades" className="btn btn-ver-mas px-5 py-3">
+          <Link to="/novedades" className="btn btn-ver-mas px-5 py-3">
             Ver más productos
           </Link>
         </div>
@@ -125,7 +125,7 @@ export default function TiendaPage() {
                 <img src="/assets/img/img_productos/papeleria_actu.jpg" alt="Nuevos Productos" />
                 <div className="promo-content">
                   <h3>Nuevos Productos</h3>
-                  <Link href="/novedades" className="btn btn-light btn-sm">Ver más</Link>
+                  <Link to="/novedades" className="btn btn-light btn-sm">Ver más</Link>
                 </div>
               </div>
             </div>
@@ -134,7 +134,7 @@ export default function TiendaPage() {
                 <img src="/assets/img/img_productos/stickers.jpg" alt="Stickers" />
                 <div className="promo-content">
                   <h3>Stickers</h3>
-                  <Link href="#" className="btn btn-light btn-sm">Ver más</Link>
+                  <Link to="#" className="btn btn-light btn-sm">Ver más</Link>
                 </div>
               </div>
             </div>
@@ -143,7 +143,7 @@ export default function TiendaPage() {
                 <img src="/assets/img/img_productos/img_productos_7.jpg" alt="Lápices" />
                 <div className="promo-content">
                   <h3>Lápices</h3>
-                  <Link href="#" className="btn btn-light btn-sm">Ver más</Link>
+                  <Link to="#" className="btn btn-light btn-sm">Ver más</Link>
                 </div>
               </div>
             </div>

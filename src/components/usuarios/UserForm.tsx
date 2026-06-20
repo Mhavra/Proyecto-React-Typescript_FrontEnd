@@ -14,8 +14,8 @@ interface UsuarioFormProps {
   onSave: (usuario: Omit<Usuario, 'id'>) => void;
   onCancel: () => void;
 }
+// ... imports
 
-// ... (imports)
 export default function UsuarioForm({ usuario, onSave, onCancel }: UsuarioFormProps) {
   const [formData, setFormData] = useState<Omit<Usuario, 'id'>>({
     nombre: '',
@@ -47,7 +47,41 @@ export default function UsuarioForm({ usuario, onSave, onCancel }: UsuarioFormPr
   return (
     <form onSubmit={handleSubmit}>
       <div className="row">
-        {/* campos de nombre, email, contraseña... */}
+        <div className="col-12 col-md-6 mb-3">
+          <label className="form-label fw-semibold">Nombre</label>
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Nombre completo"
+            value={formData.nombre}
+            onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+            required
+          />
+        </div>
+        <div className="col-12 col-md-6 mb-3">
+          <label className="form-label fw-semibold">Email</label>
+          <input
+            type="email"
+            className="form-control"
+            placeholder="usuario@ejemplo.com"
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            required
+          />
+        </div>
+        <div className="col-12 col-md-6 mb-3">
+          <label className="form-label fw-semibold">
+            {usuario ? 'Nueva contraseña (opcional)' : 'Contraseña'}
+          </label>
+          <input
+            type="password"
+            className="form-control"
+            placeholder={usuario ? 'Dejar vacío para mantener' : 'Contraseña...'}
+            value={formData.password}
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+            required={!usuario}
+          />
+        </div>
         <div className="col-12 col-md-6 mb-3">
           <label className="form-label fw-semibold">Rol</label>
           <select
