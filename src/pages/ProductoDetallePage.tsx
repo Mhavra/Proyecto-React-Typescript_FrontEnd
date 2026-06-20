@@ -12,7 +12,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { storage, STORAGE_KEYS } from '@/services/localStorageService';
 import { Producto } from '@/interfaces';
-import ProductoDetalle from '@/components/productos/ProductDetail';
+import ProductoDetalle from '@/components/productos/ProductoDetalle';
 
 export default function ProductoDetallePage() {
   const params = useParams();
