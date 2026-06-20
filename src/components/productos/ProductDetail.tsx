@@ -50,7 +50,7 @@ export default function ProductoDetalle({
                 <span className="badge" style={{ backgroundColor: '#dcd9ff', color: '#6f42c1' }}>
                   {producto.categoria}
                 </span>
-                <span className="badge bg-success">Stock: {producto.cantidad} unidades</span>
+                <span className="badge bg-success">Stock: {producto.stock} unidades</span>
                 <span className="badge bg-warning text-dark">
                   ${producto.precio.toLocaleString()}
                 </span>

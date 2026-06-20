@@ -12,7 +12,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { storage, STORAGE_KEYS } from '@/services/localStorageService';
 import { Producto } from '@/interfaces';
-import ProductoDetalle from '@/components/productos/ProductoDetalle';
+import ProductoDetalle from '@/components/productos/ProductDetail';
 
 export default function ProductoDetallePage() {
   const params = useParams();
@@ -24,7 +24,14 @@ export default function ProductoDetallePage() {
    * Carga el producto usando el ID de la URL
    */
   useEffect(() => {
-    const id = params.id as string;
+    const idParam = params.id;
+    const id = typeof idParam === 'string' ? Number(idParam) : NaN;
+
+    if (Number.isNaN(id)) {
+      router.push('/productos');
+      return;
+    }
+
     const item = storage.getItemById<Producto>(STORAGE_KEYS.PRODUCTOS, id);
     if (item) {
       setProducto(item);

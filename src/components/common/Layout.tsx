@@ -9,7 +9,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Usuario } from '@/interfaces';
 
 interface LayoutProps {
@@ -29,7 +30,7 @@ const navigation = [
 export default function Layout({ children, user, onLogout }: LayoutProps) {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const location = useLocation();
+  const pathname = usePathname();
 
   useEffect(() => {
     const darkMode = localStorage.getItem('darkMode') === 'true';
@@ -57,13 +58,9 @@ export default function Layout({ children, user, onLogout }: LayoutProps) {
 
         <nav className="nav flex-column p-3 flex-grow-1">
           {navigation.map((item) => {
-            const isActive = location.pathname === item.path;
+            const isActive = pathname === item.path;
             return (
-              <Link
-                key={item.name}
-                to={item.path}
-                className={`sidebar-link mb-1 ${isActive ? 'active' : ''}`}
-              >
+              <Link key={item.name} href={item.path} className={`sidebar-link mb-1 ${isActive ? 'active' : ''}`}>
                 <i className={`${item.icon} me-3 ${isActive ? 'text-primary' : 'text-muted'}`}></i>
                 {item.name}
               </Link>
@@ -121,11 +118,11 @@ export default function Layout({ children, user, onLogout }: LayoutProps) {
         {isMobileMenuOpen && (
           <div className="d-md-none bg-white border-bottom p-3">
             {navigation.map((item) => {
-              const isActive = location.pathname === item.path;
+              const isActive = pathname === item.path;
               return (
                 <Link
                   key={item.name}
-                  to={item.path}
+                  href={item.path}
                   className={`d-flex align-items-center py-2 px-3 rounded ${isActive ? 'bg-light text-primary' : 'text-dark'}`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >

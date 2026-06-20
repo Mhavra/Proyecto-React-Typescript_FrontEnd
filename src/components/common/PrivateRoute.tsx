@@ -8,7 +8,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 
 interface PrivateRouteProps {
@@ -17,13 +17,13 @@ interface PrivateRouteProps {
 
 export default function PrivateRoute({ children }: PrivateRouteProps) {
   const { isAuthenticated, user } = useAuth();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate('/login');
+      router.push('/login');
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, router]);
 
   if (!isAuthenticated || !user) {
     return (
