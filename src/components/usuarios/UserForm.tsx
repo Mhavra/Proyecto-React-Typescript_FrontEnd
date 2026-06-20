@@ -15,6 +15,7 @@ interface UsuarioFormProps {
   onCancel: () => void;
 }
 
+// ... (imports)
 export default function UsuarioForm({ usuario, onSave, onCancel }: UsuarioFormProps) {
   const [formData, setFormData] = useState<Omit<Usuario, 'id'>>({
     nombre: '',
@@ -46,51 +47,24 @@ export default function UsuarioForm({ usuario, onSave, onCancel }: UsuarioFormPr
   return (
     <form onSubmit={handleSubmit}>
       <div className="row">
+        {/* campos de nombre, email, contraseña... */}
         <div className="col-12 col-md-6 mb-3">
-          <label className="form-label fw-semibold">Nombre</label>
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Nombre completo"
-            value={formData.nombre}
-            onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-            required
-          />
+          <label className="form-label fw-semibold">Rol</label>
+          <select
+            className="form-select"
+            value={formData.rol}
+            onChange={(e) => setFormData({ ...formData, rol: e.target.value as 'admin' | 'cliente' })}
+          >
+            <option value="cliente">Cliente</option>
+            <option value="admin">Administrador</option>
+          </select>
         </div>
-        <div className="col-12 col-md-6 mb-3">
-          <label className="form-label fw-semibold">Email</label>
-          <input
-            type="email"
-            className="form-control"
-            placeholder="usuario@ejemplo.com"
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            required
-          />
-        </div>
-        <div className="col-12 col-md-6 mb-3">
-          <label className="form-label fw-semibold">
-            {usuario ? 'Nueva contraseña (opcional)' : 'Contraseña'}
-          </label>
-          <input
-            type="password"
-            className="form-control"
-            placeholder={usuario ? 'Dejar vacío para mantener' : 'Contraseña...'}
-            value={formData.password}
-            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-            required={!usuario}
-          />
-        </div>
-        
       </div>
       <div className="d-flex gap-2">
         <button type="submit" className="btn" style={{ backgroundColor: '#6f42c1', color: 'white' }}>
-          <i className="bi bi-save me-1"></i>
-          Guardar
+          <i className="bi bi-save me-1"></i> Guardar
         </button>
-        <button type="button" className="btn btn-secondary" onClick={onCancel}>
-          Cancelar
-        </button>
+        <button type="button" className="btn btn-secondary" onClick={onCancel}>Cancelar</button>
       </div>
     </form>
   );
