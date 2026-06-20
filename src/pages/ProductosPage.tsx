@@ -15,8 +15,8 @@ import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { storage, STORAGE_KEYS } from '@/services/localStorageService';
 import { Producto } from '@/interfaces';
 import SearchBar from '@/components/common/SearchBar';
-import ProductoForm from '@/components/productos/ProductoForm';
-import ProductoList from '@/components/productos/ProductoList';
+import ProductoForm from '@/components/productos/ProductForm';
+import ProductoList from '@/components/productos/ProductList';
 
 export default function ProductosPage() {
   const [productos, setProductos] = useLocalStorage<Producto[]>(STORAGE_KEYS.PRODUCTOS, []);
@@ -60,7 +60,7 @@ export default function ProductosPage() {
   /**
    * Maneja la eliminación de un producto
    */
-  const handleDelete = (id: string) => {
+  const handleDelete = (id: number) => {
     if (confirm('¿Eliminar este producto?')) {
       storage.deleteItem<Producto>(STORAGE_KEYS.PRODUCTOS, id);
       setProductos(storage.get<Producto>(STORAGE_KEYS.PRODUCTOS));

@@ -91,6 +91,7 @@ const getItemById = <T extends { id: number }>(key: string, id: number): T | nul
  * Servicio de localStorage
  */
 export const storage = {
+  get: getItem,
   getItem,
   setItem,
   addItem,

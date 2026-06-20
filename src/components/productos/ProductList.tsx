@@ -15,7 +15,7 @@ import { Producto } from '@/interfaces';
 interface ProductoListProps {
   productos: Producto[];
   onEdit: (producto: Producto) => void;
-  onDelete: (id: string) => void;
+  onDelete: (id: number) => void;
 }
 
 export default function ProductoList({ productos, onEdit, onDelete }: ProductoListProps) {
@@ -63,7 +63,7 @@ export default function ProductoList({ productos, onEdit, onDelete }: ProductoLi
                     </span>
                   </td>
                   <td>${producto.precio.toLocaleString()}</td>
-                  <td>{producto.cantidad}</td>
+                  <td>{producto.stock}</td>
                   <td className="text-end">
                     <button
                       onClick={() => onEdit(producto)}
