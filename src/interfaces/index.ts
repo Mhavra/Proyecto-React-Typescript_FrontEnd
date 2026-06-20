@@ -31,6 +31,8 @@ export interface Consulta {
     apellido: string;
     email: string;
     motivo: string;
+    fecha: string;
+    hora: string;
     estado: 'no_leida' | 'leida';
 }
 

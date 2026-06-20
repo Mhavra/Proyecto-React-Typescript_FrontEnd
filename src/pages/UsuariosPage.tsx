@@ -11,8 +11,8 @@ import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { storage, STORAGE_KEYS } from '@/services/localStorageService';
 import { Usuario } from '@/interfaces';
 import SearchBar from '@/components/common/SearchBar';
-import UsuarioList from '@/components/usuarios/UsuarioList';
-import UsuarioForm from '@/components/usuarios/UsuarioForm';
+import UsuarioList from '@/components/usuarios/UserList';
+import UsuarioForm from '@/components/usuarios/UserForm';
 
 export default function UsuariosPage() {
   const [usuarios, setUsuarios] = useLocalStorage<Usuario[]>(STORAGE_KEYS.USUARIOS, []);
