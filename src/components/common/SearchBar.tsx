@@ -1,11 +1,5 @@
 /**
  * SEARCH BAR - Componente de búsqueda reutilizable
- * 
- * @component
- * @param props.placeholder - Texto del placeholder
- * @param props.value - Valor del input
- * @param props.onChange - Función al cambiar
- * @param props.className - Clases adicionales
  */
 
 'use client';

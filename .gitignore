@@ -1,5 +1,8 @@
 # Dependencias
 node_modules/
+yarn.lock
+.next/
+next-env.d.ts
 /.pnp
 .pnp.js
 .yarn/

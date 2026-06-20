@@ -19,8 +19,9 @@ La dueña necesita una plataforma que le permita:
 
 -Todo esto en una interfaz protegida por login, con persistencia de datos y navegación fluida.
 
------------
+
 Cambios y mejoras respecto a la segunda etapa
+----
 -Migración a React + TypeScript: Se reemplaza el HTML/CSS/JS estático por una SPA con componentes modulares, tipado fuerte y estado controlado.
 
 -Rutas protegidas y autenticación: Se implementa login simulado con credenciales predefinidas, contexto global para el usuario (useContext) y redirección automática al login si no hay sesión activa.
@@ -35,9 +36,14 @@ Cambios y mejoras respecto a la segunda etapa
 
 -Diseño consistente y modo oscuro: Se conserva la identidad visual de Frenesí (colores, iconos) y el modo oscuro/claro implementado en la ES2, ahora gestionado desde React con localStorage.
 
---------------------------
+Inicializar el proyecto
+----------
+En CMD, la carpeta del proyecto raiz:
+-npm install / yarn install
+-npm run dev / yarn dev
 
 Listado de secciones que tendrá el sitio web.
+--------------------------
 -Inicio
 -Nosotros
 -Novedades
@@ -46,6 +52,7 @@ Listado de secciones que tendrá el sitio web.
 -Panel de administrador
 
 Integrantes del grupo con sus respectivos roles.
+------------------------------------
 -Nayaret Larrondo
 -Fram Salinas
 -Nilson Oyarce
