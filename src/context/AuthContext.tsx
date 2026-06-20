@@ -7,6 +7,7 @@
  * @module context/AuthContext
  */
 
+// src/context/AuthContext.tsx (actualizado)
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
@@ -15,9 +16,6 @@ import { storage, STORAGE_KEYS } from '@/services/localStorageService';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-/**
- * Usuarios por defecto (se crean si no existen en localStorage)
- */
 const DEFAULT_USERS: Usuario[] = [
   {
     id: 1,
@@ -35,19 +33,14 @@ const DEFAULT_USERS: Usuario[] = [
   },
 ];
 
-/**
- * Proveedor del contexto de autenticación
- */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<Usuario | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  /**
-   * Cargar sesión desde localStorage al montar el componente
-   */
   useEffect(() => {
-    const session = storage.getItemById<{ id: number; userId: number }>(STORAGE_KEYS.SESSION, 1);
+    // Cargar sesión desde localStorage
+    const session = storage.getItemById<{ userId: number }>(STORAGE_KEYS.SESSION, 1);
     if (session) {
       const users = storage.get<Usuario>(STORAGE_KEYS.USUARIOS);
       const foundUser = users.find(u => u.id === session.userId);
@@ -59,12 +52,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(false);
   }, []);
 
-  /**
-   * Iniciar sesión
-   * @param email - Correo del usuario
-   * @param password - Contraseña
-   * @returns true si el login es exitoso
-   */
   const login = async (email: string, password: string): Promise<boolean> => {
     let users = storage.get<Usuario>(STORAGE_KEYS.USUARIOS);
     if (users.length === 0) {
@@ -76,25 +63,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (foundUser) {
       setUser(foundUser);
       setIsAuthenticated(true);
-      // Guardar sesión con ID numérico
+      // Guardar sesión
       storage.addItem(STORAGE_KEYS.SESSION, { userId: foundUser.id });
       return true;
     }
     return false;
   };
 
-  /**
-   * Cerrar sesión
-   */
   const logout = () => {
-    const currentUserId = user?.id;
     setUser(null);
     setIsAuthenticated(false);
-    if (currentUserId !== undefined) {
-      const items = storage.get<{ id: number; userId: number }>(STORAGE_KEYS.SESSION);
-      const filtered = items.filter(item => item.userId !== currentUserId);
-      storage.setItem(STORAGE_KEYS.SESSION, filtered);
-    }
+    // Eliminar sesión (borrar todos los registros de sesión)
+    storage.setItem(STORAGE_KEYS.SESSION, []);
   };
 
   if (loading) {
@@ -108,9 +88,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-/**
- * Hook para usar el contexto de autenticación
- */
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
