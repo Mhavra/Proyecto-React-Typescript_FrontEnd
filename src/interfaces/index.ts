@@ -2,7 +2,7 @@ export interface Usuario {
     id: number;
     nombre: string;
     email: string;
-    rol: 'admin' | 'editor' | 'viewer';
+    rol: 'admin' | 'editor' | 'viewer' | 'cliente';
     password?: string;
 }
 
@@ -31,5 +31,12 @@ export interface Consulta {
     apellido: string;
     email: string;
     motivo: string;
-    
+    estado: 'no_leida' | 'leida';
+}
+
+export interface AuthContextType {
+    user: Usuario | null;
+    login: (email: string, password: string) => Promise<boolean>;
+    logout: () => void;
+    isAuthenticated: boolean;
 }
