@@ -1,4 +1,82 @@
+# Dependencias
 node_modules/
 yarn.lock
 .next/
 next-env.d.ts
+/.pnp
+.pnp.js
+.yarn/
+yarn-error.log
+npm-debug.log*
+package-lock.json
+yarn.lock
+
+# Build y distribución
+/build
+/dist
+/out
+/.next
+/.output
+/storybook-static
+/.vercel
+
+# Archivos de entorno
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+.#*
+
+# Archivos de logs y caché
+*.log
+.cache/
+.parcel-cache/
+.eslintcache
+*.tsbuildinfo
+
+# Cobertura de pruebas
+coverage/
+.nyc_output/
+*.lcov
+
+# Archivos de IDE y editores
+.vscode/
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# Archivos de TypeScript (solo si generas JS en la misma carpeta)
+*.js
+*.d.ts
+*.js.map
+!*.d.ts
+!*.js
+!*.js.map
+
+# Archivos de dependencias de Python (si usas)
+__pycache__/
+*.pyc
+
+# Otros
+*.tgz
+*.gz
+*.rar
+*.zip
+*.7z
+*.tmp
+*.temp
+.vscode-test/
