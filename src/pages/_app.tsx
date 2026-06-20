@@ -15,9 +15,10 @@ import ProductoDetallePage from '@/pages/ProductoDetallePage';
 import PedidosPage from '@/pages/PedidosPage';
 import ConsultasPage from '@/pages/ConsultasPage';
 import UsuariosPage from '@/pages/UsuariosPage';
-import '../src/styles/globals.css';  // ← Ruta corregida
-import '/bootstrap/dist/css/bootstrap.min.css';
+import '../styles/globals.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
+
 
 function AppRoutes() {
   const { user, logout } = useAuth();
