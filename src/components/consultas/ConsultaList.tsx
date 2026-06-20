@@ -2,6 +2,9 @@
  * CONSULTA LIST - Listado de consultas
  * 
  * @component
+ * @param props.consultas - Lista de consultas
+ * @param props.onCambiarEstado - Función para cambiar estado
+ * @param props.onDelete - Función para eliminar
  */
 
 'use client';
@@ -24,6 +27,9 @@ export default function ConsultaList({ consultas, onCambiarEstado, onDelete }: C
     );
   }
 
+  /**
+   * Obtiene la clase CSS según el estado
+   */
   const getEstadoColor = (estado: string) => {
     const colors: Record<string, string> = {
       no_leida: 'bg-danger text-white',
@@ -33,6 +39,9 @@ export default function ConsultaList({ consultas, onCambiarEstado, onDelete }: C
     return colors[estado] || 'bg-secondary text-white';
   };
 
+  /**
+   * Obtiene el texto legible del estado
+   */
   const getEstadoTexto = (estado: string) => {
     const textos: Record<string, string> = {
       no_leida: 'No leída',

@@ -14,7 +14,6 @@ interface UsuarioFormProps {
   onSave: (usuario: Omit<Usuario, 'id'>) => void;
   onCancel: () => void;
 }
-// ... imports
 
 export default function UsuarioForm({ usuario, onSave, onCancel }: UsuarioFormProps) {
   const [formData, setFormData] = useState<Omit<Usuario, 'id'>>({

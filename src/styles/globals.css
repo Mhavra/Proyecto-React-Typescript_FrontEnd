@@ -1,15 +1,4 @@
 .layout {
-  display: flex;
-  min-height: 100vh;
-}
-.sidebar .nav-link {
-  transition: background 0.2s;
-}
-.sidebar .nav-link:hover {
-  background: rgba(255,255,255,0.15);
-}
-
-.layout {
   width: 100%;
   min-height: 100vh;
   display: grid;
@@ -309,7 +298,10 @@ img {
   padding: 0.5rem 0;
 }
 
-
+.carousel-wrapper {
+  position: relative;
+  overflow: hidden; 
+}
 
 /* Flechas  */
 .carousel-control-prev-icon,
@@ -1107,99 +1099,4 @@ body.dark .fcolor {
 
 #tablaRegistros th {
   background-color: #dc8aff;
-}
-
-/* Modo oscuro - hover del menu */
-body.dark .menu-domi .btn-outline-light {
-    background-color: transparent !important;
-    color: #ddd !important;
-}
-
-body.dark .menu-domi .btn-outline-light:hover {
-    background-color: #3a3a4a !important;
-    color: #fff !important;
-    border-color: #c084fc !important;
-}
-
-body.dark .menu-domi .btn {
-    background-color: transparent !important;
-    color: #ddd !important;
-}
-
-body.dark .menu-domi .btn:hover {
-    background-color: #3a3a4a !important;
-    color: #fff !important;
-}
-
-body.dark .menu-domi .btn-outline-light {
-    border-color: #c084fc !important;
-}
-/* Por defecto en pantallas grandes - menu visible, boton oculto */
-.menu-domi {
-    display: flex !important;
-}
-
-.menu-toggle {
-    display: none;
-}
-
-/* Solo en pantallas pequeñas (menos de 992px) se activa el menu hamburguesa */
-@media (max-width: 992px) {
-    .menu-toggle {
-        display: inline-flex;
-    }
-    
-    .menu-domi {
-        display: none !important;
-    }
-    
-    .menu-domi.mobile-open {
-        display: block !important;
-        background-color: #ffffff;
-        padding: 15px;
-        border-radius: 10px;
-        margin: 10px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-    
-    /* Modo oscuro en celular */
-    body.dark .menu-domi.mobile-open {
-        background-color: #1e1e2a;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    }
-    
-    body.dark .menu-domi.mobile-open .btn {
-        color: #ddd;
-    }
-    
-    body.dark .menu-domi.mobile-open .btn:hover {
-        background-color: #3a3a4a;
-        color: #fff;
-    }
-}
-@media (max-width: 992px) {
-    .menu-toggle {
-        background-color: transparent;
-        color: #686868;
-        border: none;
-    }
-    
-    .menu-toggle:hover {
-        background-color: transparent;
-        color: #333;
-    }
-    
-    /* Modo oscuro - solo en celular */
-    body.dark .menu-toggle {
-        background-color: transparent;
-        color: #c084fc;
-    }
-    
-    body.dark .menu-toggle:hover {
-        background-color: transparent;
-        color: #a855f7;
-    }
-}
-body.dark .container.my-5.text-center h1 {
-    color: #dbd0e6 !important;
 }

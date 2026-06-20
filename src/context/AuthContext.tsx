@@ -7,6 +7,7 @@
  * @module context/AuthContext
  */
 
+// src/context/AuthContext.tsx (actualizado)
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
@@ -26,6 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Cargar sesión desde localStorage    
     const sessions = storage.get<{ userId: number }>(STORAGE_KEYS.SESSION);
     if (sessions.length > 0) {
       const session = sessions[0];
@@ -49,7 +51,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (foundUser) {
       setUser(foundUser);
       setIsAuthenticated(true);
-      storage.setItem(STORAGE_KEYS.SESSION, [{ userId: foundUser.id }]);
+      // Guardar sesión
+        storage.setItem(STORAGE_KEYS.SESSION, [{ userId: foundUser.id }]);
       return true;
     }
     return false;
@@ -58,6 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     setUser(null);
     setIsAuthenticated(false);
+    // Eliminar sesión (borrar todos los registros de sesión)
     storage.setItem(STORAGE_KEYS.SESSION, []);
   };
 

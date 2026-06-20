@@ -25,6 +25,7 @@ function AppRoutes() {
 
   return (
     <Routes>
+      {/* Rutas públicas */}
       <Route path="/" element={<TiendaPage />} />
       <Route path="/novedades" element={<NovedadesPage />} />
       <Route path="/servicio-cliente" element={<ServicioClientePage />} />
@@ -32,6 +33,7 @@ function AppRoutes() {
       <Route path="/acerca-de-nosotros" element={<AcercaDeNosotrosPage />} />
       <Route path="/login" element={<LoginPage />} />
 
+      {/* Rutas privadas (solo admin) */}
       <Route
         path="/dashboard"
         element={

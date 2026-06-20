@@ -18,19 +18,26 @@ export default function ConsultasPage() {
   const [filtroEstado, setFiltroEstado] = useState<string>('todas');
   const [search, setSearch] = useState('');
 
-  const consultasFiltradas = consultas.filter(c => {
+  /**
+   * Filtra consultas por estado y cliente
+   */
+        const consultasFiltradas = consultas.filter(c => {
     const matchesEstado = filtroEstado === 'todas' ? true : c.estado === filtroEstado;
     const matchesSearch = c.nombre.toLowerCase().includes(search.toLowerCase()) ||
                           c.apellido.toLowerCase().includes(search.toLowerCase()) ||
                           c.email.toLowerCase().includes(search.toLowerCase());
     return matchesEstado && matchesSearch;
   });
-
+   /**
+   * Cambia el estado de una consulta
+   */
   const handleCambiarEstado = (id: number, nuevoEstado: 'leida' | 'respondida') => {
   storage.updateItem<Consulta>(STORAGE_KEYS.CONSULTAS, id, { estado: nuevoEstado });
   setConsultas(storage.get<Consulta>(STORAGE_KEYS.CONSULTAS));
     };
-
+ /**
+   * Elimina una consulta
+   */
   const handleDelete = (id: number) => {
     if (confirm('¿Eliminar esta consulta?')) {
       storage.deleteItem<Consulta>(STORAGE_KEYS.CONSULTAS, id);
@@ -42,6 +49,7 @@ export default function ConsultasPage() {
     <div>
       <h4 className="fw-bold mb-4">Consultas de Clientes</h4>
 
+      {/* Filtros */}
       <div className="d-flex flex-wrap gap-2 mb-3">
         <button
           onClick={() => setFiltroEstado('todas')}
