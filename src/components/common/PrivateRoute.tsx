@@ -1,38 +1,31 @@
-/**
- * PRIVATE ROUTE - Protege rutas que requieren autenticación
- * 
- * @component
- * @param props.children - Componentes hijos
- */
-
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 
 interface PrivateRouteProps {
   children: React.ReactNode;
+  allowedRoles?: string[]; // opcional, por defecto solo admin
 }
 
-export default function PrivateRoute({ children }: PrivateRouteProps) {
+export default function PrivateRoute({ children, allowedRoles = ['admin'] }: PrivateRouteProps) {
   const { isAuthenticated, user } = useAuth();
-  const router = useRouter();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push('/login');
+      navigate('/login');
+      return;
     }
-  }, [isAuthenticated, router]);
+    if (user && !allowedRoles.includes(user.rol)) {
+      // Si no tiene el rol permitido, redirigir a la tienda
+      navigate('/');
+    }
+  }, [isAuthenticated, user, allowedRoles, navigate]);
 
-  if (!isAuthenticated || !user) {
-    return (
-      <div className="text-center py-5">
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Cargando...</span>
-        </div>
-      </div>
-    );
+  if (!isAuthenticated || !user || !allowedRoles.includes(user.rol)) {
+    return <div className="text-center py-5">Cargando...</div>;
   }
 
   return <>{children}</>;
