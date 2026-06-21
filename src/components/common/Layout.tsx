@@ -9,8 +9,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 import { Usuario } from '@/interfaces';
 
 interface LayoutProps {
@@ -20,7 +20,7 @@ interface LayoutProps {
 }
 
 const navigation = [
-  { name: 'Dashboard', path: '/', icon: 'bi bi-grid-1x2-fill' },
+  { name: 'Dashboard', path: '/dashboard', icon: 'bi bi-grid-1x2-fill' },
   { name: 'Productos', path: '/productos', icon: 'bi bi-box-seam-fill' },
   { name: 'Pedidos', path: '/pedidos', icon: 'bi bi-cart-fill' },
   { name: 'Consultas', path: '/consultas', icon: 'bi bi-chat-dots-fill' },
@@ -30,44 +30,50 @@ const navigation = [
 export default function Layout({ children, user, onLogout }: LayoutProps) {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const pathname = usePathname();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const darkMode = localStorage.getItem('darkMode') === 'true';
     setIsDarkMode(darkMode);
-    if (darkMode) {
-      document.body.classList.add('dark-mode');
-    }
+    if (darkMode) document.body.classList.add('dark');
   }, []);
 
   const toggleDarkMode = () => {
     const newMode = !isDarkMode;
     setIsDarkMode(newMode);
     localStorage.setItem('darkMode', String(newMode));
-    document.body.classList.toggle('dark-mode');
+    document.body.classList.toggle('dark');
+  };
+
+  const handleLogout = () => {
+    onLogout();
+    navigate('/'); // Redirige a TiendaPage
   };
 
   return (
     <div className="d-flex vh-100 overflow-hidden">
-      {/* Sidebar - Desktop */}
+      {/* Sidebar */}
       <div className="sidebar d-none d-md-flex flex-column flex-shrink-0">
         <div className="d-flex align-items-center px-4 py-3 border-bottom">
           <h5 className="fw-bold mb-0" style={{ color: '#6f42c1' }}>Frenesí</h5>
           <span className="ms-1 text-muted small">Intranet</span>
         </div>
-
         <nav className="nav flex-column p-3 flex-grow-1">
           {navigation.map((item) => {
-            const isActive = pathname === item.path;
+            const isActive = location.pathname === item.path;
             return (
-              <Link key={item.name} href={item.path} className={`sidebar-link mb-1 ${isActive ? 'active' : ''}`}>
+              <Link
+                key={item.name}
+                to={item.path}
+                className={`sidebar-link mb-1 ${isActive ? 'active' : ''}`}
+              >
                 <i className={`${item.icon} me-3 ${isActive ? 'text-primary' : 'text-muted'}`}></i>
                 {item.name}
               </Link>
             );
           })}
         </nav>
-
         <div className="p-3 border-top">
           <small className="text-muted">Frenesí Papelería v1.0</small>
         </div>
@@ -75,7 +81,6 @@ export default function Layout({ children, user, onLogout }: LayoutProps) {
 
       {/* Contenido principal */}
       <div className="flex-grow-1 d-flex flex-column overflow-hidden">
-        {/* Navbar */}
         <header className="bg-white border-bottom px-4 py-3 d-flex align-items-center justify-content-between">
           <button
             className="btn d-md-none"
@@ -83,7 +88,6 @@ export default function Layout({ children, user, onLogout }: LayoutProps) {
           >
             <i className="bi bi-list fs-4"></i>
           </button>
-
           <h5 className="mb-0 fw-semibold d-md-none">Frenesí</h5>
 
           <div className="d-flex align-items-center gap-2 ms-auto">
@@ -107,7 +111,7 @@ export default function Layout({ children, user, onLogout }: LayoutProps) {
               </div>
             </div>
 
-            <button onClick={onLogout} className="btn btn-danger btn-sm px-3">
+            <button onClick={handleLogout} className="btn btn-danger btn-sm px-3">
               <i className="bi bi-box-arrow-right me-1"></i>
               <span className="d-none d-sm-inline">Salir</span>
             </button>
@@ -118,11 +122,11 @@ export default function Layout({ children, user, onLogout }: LayoutProps) {
         {isMobileMenuOpen && (
           <div className="d-md-none bg-white border-bottom p-3">
             {navigation.map((item) => {
-              const isActive = pathname === item.path;
+              const isActive = location.pathname === item.path;
               return (
                 <Link
                   key={item.name}
-                  href={item.path}
+                  to={item.path}
                   className={`d-flex align-items-center py-2 px-3 rounded ${isActive ? 'bg-light text-primary' : 'text-dark'}`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
