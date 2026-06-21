@@ -9,15 +9,36 @@
 
 'use client';
 
+import { useState } from 'react';
 import { Consulta } from '@/interfaces';
 
 interface ConsultaListProps {
   consultas: Consulta[];
-  onCambiarEstado: (id: number, nuevoEstado: 'leida' | 'respondida') => void;
+  onCambiarEstado: (id: number, nuevoEstado: 'leida' | 'respondida', respuesta?: string) => void;
   onDelete: (id: number) => void;
 }
 
 export default function ConsultaList({ consultas, onCambiarEstado, onDelete }: ConsultaListProps) {
+  const [respondiendoId, setRespondiendoId] = useState<number | null>(null);
+  const [respuestaTexto, setRespuestaTexto] = useState('');
+
+  const handleResponder = (id: number) => {
+    if (respondiendoId === id) {
+      // Enviar respuesta
+      if (respuestaTexto.trim()) {
+        onCambiarEstado(id, 'respondida', respuestaTexto.trim());
+        setRespondiendoId(null);
+        setRespuestaTexto('');
+      } else {
+        alert('Escribe una respuesta antes de enviar.');
+      }
+    } else {
+      setRespondiendoId(id);
+      const consulta = consultas.find(c => c.id === id);
+      setRespuestaTexto(consulta?.respuesta || '');
+    }
+  };
+
   if (consultas.length === 0) {
     return (
       <div className="text-center text-muted py-5">
@@ -27,9 +48,6 @@ export default function ConsultaList({ consultas, onCambiarEstado, onDelete }: C
     );
   }
 
-  /**
-   * Obtiene la clase CSS según el estado
-   */
   const getEstadoColor = (estado: string) => {
     const colors: Record<string, string> = {
       no_leida: 'bg-danger text-white',
@@ -39,9 +57,6 @@ export default function ConsultaList({ consultas, onCambiarEstado, onDelete }: C
     return colors[estado] || 'bg-secondary text-white';
   };
 
-  /**
-   * Obtiene el texto legible del estado
-   */
   const getEstadoTexto = (estado: string) => {
     const textos: Record<string, string> = {
       no_leida: 'No leída',
@@ -87,31 +102,62 @@ export default function ConsultaList({ consultas, onCambiarEstado, onDelete }: C
                     </span>
                   </td>
                   <td className="text-end">
-                    {consulta.estado === 'no_leida' && (
-                      <button
-                        onClick={() => onCambiarEstado(consulta.id, 'leida')}
-                        className="btn btn-sm btn-warning me-1"
-                        title="Marcar como leída"
-                      >
-                        <i className="bi bi-envelope-open"></i>
-                      </button>
+                    {respondiendoId === consulta.id ? (
+                      <div className="d-flex flex-column gap-1">
+                        <textarea
+                          className="form-control form-control-sm"
+                          rows={2}
+                          placeholder="Escribe tu respuesta..."
+                          value={respuestaTexto}
+                          onChange={(e) => setRespuestaTexto(e.target.value)}
+                        />
+                        <div className="d-flex gap-1 justify-content-end">
+                          <button
+                            className="btn btn-sm btn-success"
+                            onClick={() => handleResponder(consulta.id)}
+                          >
+                            <i className="bi bi-send"></i> Enviar
+                          </button>
+                          <button
+                            className="btn btn-sm btn-secondary"
+                            onClick={() => {
+                              setRespondiendoId(null);
+                              setRespuestaTexto('');
+                            }}
+                          >
+                            Cancelar
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        {consulta.estado === 'no_leida' && (
+                          <button
+                            onClick={() => onCambiarEstado(consulta.id, 'leida')}
+                            className="btn btn-sm btn-warning me-1"
+                            title="Marcar como leída"
+                          >
+                            <i className="bi bi-envelope-open"></i>
+                          </button>
+                        )}
+                        {consulta.estado === 'leida' && (
+                          <button
+                            onClick={() => handleResponder(consulta.id)}
+                            className="btn btn-sm btn-info me-1"
+                            title="Responder"
+                          >
+                            <i className="bi bi-reply"></i>
+                          </button>
+                        )}
+                        <button
+                          onClick={() => onDelete(consulta.id)}
+                          className="btn btn-sm btn-outline-danger"
+                          title="Eliminar consulta"
+                        >
+                          <i className="bi bi-trash"></i>
+                        </button>
+                      </>
                     )}
-                    {consulta.estado === 'leida' && (
-                      <button
-                        onClick={() => onCambiarEstado(consulta.id, 'respondida')}
-                        className="btn btn-sm btn-success me-1"
-                        title="Marcar como respondida"
-                      >
-                        <i className="bi bi-check2-circle"></i>
-                      </button>
-                    )}
-                    <button
-                      onClick={() => onDelete(consulta.id)}
-                      className="btn btn-sm btn-outline-danger"
-                      title="Eliminar consulta"
-                    >
-                      <i className="bi bi-trash"></i>
-                    </button>
                   </td>
                 </tr>
               ))}

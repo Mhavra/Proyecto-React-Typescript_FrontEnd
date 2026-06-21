@@ -27,8 +27,8 @@ export default function ProductoForm({ producto, onSave, onCancel }: ProductoFor
     descripcion: '',
     stock: 0,
   });
+  const [imagePreview, setImagePreview] = useState<string>('');
 
-  // Cargar datos si es edición
   useEffect(() => {
     if (producto) {
       setFormData({
@@ -36,15 +36,25 @@ export default function ProductoForm({ producto, onSave, onCancel }: ProductoFor
         categoria: producto.categoria,
         precio: producto.precio,
         imagen: producto.imagen,
-        descripcion: producto.descripcion,
-        stock: producto.stock,
+        descripcion: producto.descripcion || '',
+        stock: producto.stock || 0,
       });
+      setImagePreview(producto.imagen);
     }
   }, [producto]);
 
-  /**
-   * Maneja el envío del formulario
-   */
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target?.result as string;
+      setImagePreview(base64);
+      setFormData({ ...formData, imagen: base64 });
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     onSave(formData);
@@ -100,14 +110,18 @@ export default function ProductoForm({ producto, onSave, onCancel }: ProductoFor
           />
         </div>
         <div className="col-12 mb-3">
-          <label className="form-label fw-semibold">URL de imagen</label>
+          <label className="form-label fw-semibold">Imagen del producto</label>
           <input
-            type="text"
+            type="file"
             className="form-control"
-            placeholder="https://ejemplo.com/imagen.jpg"
-            value={formData.imagen}
-            onChange={(e) => setFormData({ ...formData, imagen: e.target.value })}
+            accept="image/*"
+            onChange={handleImageChange}
           />
+          {imagePreview && (
+            <div className="mt-2">
+              <img src={imagePreview} alt="Vista previa" style={{ maxWidth: '150px', maxHeight: '150px' }} />
+            </div>
+          )}
         </div>
         <div className="col-12 mb-3">
           <label className="form-label fw-semibold">Descripción</label>
@@ -122,12 +136,9 @@ export default function ProductoForm({ producto, onSave, onCancel }: ProductoFor
       </div>
       <div className="d-flex gap-2">
         <button type="submit" className="btn" style={{ backgroundColor: '#6f42c1', color: 'white' }}>
-          <i className="bi bi-save me-1"></i>
-          Guardar
+          <i className="bi bi-save me-1"></i> Guardar
         </button>
-        <button type="button" className="btn btn-secondary" onClick={onCancel}>
-          Cancelar
-        </button>
+        <button type="button" className="btn btn-secondary" onClick={onCancel}>Cancelar</button>
       </div>
     </form>
   );

@@ -36,6 +36,7 @@ export interface Consulta {
   fecha: string;   
   hora: string;    
   estado: 'no_leida' | 'leida' | 'respondida';
+  respuesta?: string;
 }
 
 export interface AuthContextType {

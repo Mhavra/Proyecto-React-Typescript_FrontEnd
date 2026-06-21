@@ -15,71 +15,55 @@ export default function TiendaPage() {
     const all = storage.get<Producto>(STORAGE_KEYS.PRODUCTOS);
     const vintage = all.filter(p => p.categoria?.toLowerCase() === 'vintage');
     const nuevos = all.filter(p => p.categoria?.toLowerCase() === 'nuevos');
-    setVintageProducts(vintage);
-    setNuevosProducts(nuevos);
+    // Mostrar solo los primeros 4 de cada categoría
+    setVintageProducts(vintage.slice(0, 4));
+    setNuevosProducts(nuevos.slice(0, 4));
   }, []);
 
-  // Función para renderizar carrusel (reutilizable)
-  const renderCarousel = (products: Producto[], id: string, title: string, subtitle: string) => {
-    // Agrupamos de a 4 productos por slide
-    const slides = [];
-    for (let i = 0; i < products.length; i += 4) {
-      slides.push(products.slice(i, i + 4));
+  const handleAddToCart = (prod: Producto) => {
+    const cart = JSON.parse(localStorage.getItem('frenesiCarrito') || '[]');
+    const existing = cart.find((item: any) => String(item.id) === String(prod.id));
+    if (existing) {
+      existing.cantidad += 1;
+    } else {
+      cart.push({ id: prod.id, nombre: prod.nombre, precio: prod.precio, cantidad: 1 });
     }
+    localStorage.setItem('frenesiCarrito', JSON.stringify(cart));
+    window.dispatchEvent(new Event('storage'));
+  };
 
+  const renderProductGrid = (products: Producto[], title: string, subtitle: string) => {
+    if (products.length === 0) return null;
     return (
       <>
         <div className="row g-1 text-center align-items-center d-flex mt-5">
           <h1>{title}</h1>
           <p className="hero-subtitle">{subtitle}</p>
         </div>
-        <div id={id} className="carousel slide" data-bs-ride="false">
-          <div className="carousel-inner" id={`${id}Inner`}>
-            {slides.map((slide, idx) => (
-              <div key={idx} className={`carousel-item ${idx === 0 ? 'active' : ''}`}>
-                <div className="row g-4 justify-content-center">
-                  {slide.map(prod => (
-                    <div key={prod.id} className="col-6 col-md-3">
-                      <div className="card border-0 h-100">
-                        <div className="card-img-top">
-                          <img src={prod.imagen} alt={prod.nombre} style={{ width: '100%', aspectRatio: '1/1', objectFit: 'contain' }} />
-                        </div>
-                        <div className="card-body p-0 mt-3 text-center">
-                          <div className="product-title">{prod.nombre}</div>
-                          <div className="product-price">${prod.precio}</div>
-                          <button
-                            className="btn btn-add-cart w-100 mt-2"
-                            data-product-id={prod.id}
-                            onClick={() => {
-                              // Lógica de agregar al carrito
-                              const cart = JSON.parse(localStorage.getItem('frenesiCarrito') || '[]');
-                              const existing = cart.find((item: any) => String(item.id) === String(prod.id));
-                              if (existing) {
-                                existing.cantidad += 1;
-                              } else {
-                                cart.push({ id: prod.id, nombre: prod.nombre, precio: prod.precio, cantidad: 1 });
-                              }
-                              localStorage.setItem('frenesiCarrito', JSON.stringify(cart));
-                              // Disparar evento para actualizar contador
-                              window.dispatchEvent(new Event('storage'));
-                            }}
-                          >
-                            Agregar al carrito
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+        <div className="row g-4 justify-content-center">
+          {products.map(prod => (
+            <div key={prod.id} className="col-6 col-md-3">
+              <div className="card border-0 h-100">
+                <div className="card-img-top">
+                  <img
+                    src={prod.imagen}
+                    alt={prod.nombre}
+                    style={{ width: '100%', aspectRatio: '1/1', objectFit: 'contain' }}
+                  />
+                </div>
+                <div className="card-body p-0 mt-3 text-center">
+                  <div className="product-title">{prod.nombre}</div>
+                  <div className="product-price">${prod.precio}</div>
+                  <button
+                    className="btn btn-add-cart w-100 mt-2"
+                    onClick={() => handleAddToCart(prod)}
+                  >
+                    Agregar al carrito
+                  </button>
                 </div>
               </div>
-            ))}
-          </div>
-          <button className="carousel-control-prev" type="button" data-bs-target={`#${id}`} data-bs-slide="prev">
-            <span className="carousel-control-prev-icon"></span>
-          </button>
-          <button className="carousel-control-next" type="button" data-bs-target={`#${id}`} data-bs-slide="next">
-            <span className="carousel-control-next-icon"></span>
-          </button>
+            </div>
+          ))}
         </div>
       </>
     );
@@ -100,17 +84,18 @@ export default function TiendaPage() {
             <div className="container position-relative">
               <p className="hero-subtitle">Papelería Vintage</p>
               <h1 className="hero-title">Detalles que inspiran</h1>
-            <Link to="#promoVintage" className="hero-btn">Retro/Vintage</Link>
+              <a href="#promoVintage" className="hero-btn">Retro/Vintage</a>
             </div>
           </section>
         </div>
 
-        {/* Carrusel Vintage */}
-        {renderCarousel(vintageProducts, 'carouselVintage', 'Vintage', 'Revive tus recuerdos')}
+        {/* Sección Vintage */}
+        {renderProductGrid(vintageProducts, 'Vintage', 'Revive tus recuerdos')}
 
-        {/* Carrusel Nuevos Productos */}
-        {renderCarousel(nuevosProducts, 'carouselNuevos', 'Nuevos Productos', 'Productos recién agregados')}
+        {/* Sección Nuevos Productos */}
+        {renderProductGrid(nuevosProducts, 'Nuevos Productos', 'Productos recién agregados')}
 
+        {/* Botón Ver más */}
         <div className="container text-center mt-0 mb-4">
           <Link to="/novedades" className="btn btn-ver-mas px-5 py-3">
             Ver más productos
