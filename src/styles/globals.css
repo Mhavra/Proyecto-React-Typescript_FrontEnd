@@ -456,20 +456,7 @@ img {
   transform: translateY(-2px);
 
 }
- 
-.btn-ver-mas {
-  background-color: transparent;
-  border: 1px solid #FF5FA2;
-  color: #333;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  padding-top: -0px;
-}
 
-.btn-ver-mas:hover {
-  background-color: #fff4e7;
-  color: #000;
-}
 
 /*footer*/
 
@@ -862,15 +849,6 @@ body.dark .btn-add-cart:hover {
     background-color: #6866a6 !important;
 }
 
-body.dark .btn-ver-mas {
-    border-color: #c084fc !important;
-    color: #fff !important;
-}
-
-body.dark .btn-ver-mas:hover {
-    background-color: #a855f7 !important;
-    color: #fff !important;
-}
 
 body.dark .promo-box {
     background-color: #1e1e2a !important;
@@ -1134,23 +1112,6 @@ body.dark .fcolor {
   box-shadow: 0 4px 12px rgba(139, 227, 235, 0.4);
 }
 
-/* Botón "Ver más productos" */
-.btn-ver-mas {
-  background-color: transparent;
-  border: 2px solid #FF5FA2;
-  color: #333;
-  font-size: 1rem;
-  padding: 12px 30px;
-  transition: all 0.3s ease;
-  border-radius: 30px;
-  font-weight: 500;
-}
-.btn-ver-mas:hover {
-  background-color: #fff4e7;
-  color: #000;
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(255, 95, 162, 0.3);
-}
 
 /* Flechas del carrusel - mejor posicionamiento */
 .carousel-control-prev,
@@ -1201,19 +1162,6 @@ body.dark .fcolor {
   background-color: #8be3eb;
 }
 
-/* Botón "Ver más productos" */
-.btn-ver-mas {
-  background-color: transparent;
-  border: 1px solid #FF5FA2;
-  color: #333;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  border-radius: 30px;
-}
-.btn-ver-mas:hover {
-  background-color: #fff4e7;
-  color: #000;
-}
 
 /* Desktop: menú horizontal */
 @media (min-width: 993px) {
@@ -1228,7 +1176,7 @@ body.dark .fcolor {
   }
 }
 
-* Nombre de usuario en header (visible en oscuro) */
+/* Nombre de usuario en header (visible en oscuro) */
 body.dark .header .text-muted {
   color: #e0e0e0 !important;
 }
@@ -1446,4 +1394,44 @@ body.dark .alert-success {
   background: #1a3a1a !important;
   color: #8aff8a !important;
   border-color: #2a5a2a !important;
+}
+
+/* ============================================================
+   BOTONES (unificados para claro y oscuro)
+   ============================================================ */
+
+/* Botón "Agregar al carrito" - Modo claro */
+.btn-add-cart {
+  background-color: #fd8aba;
+  color: white;
+  border: 2px solid #fd8aba;
+  border-radius: 6px;
+  padding: 10px 0;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+.btn-add-cart:hover {
+  background-color: #8be3eb;
+  border-color: #8be3eb;
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(139, 227, 235, 0.4);
+}
+
+/* Botón "Ver más productos" - Modo claro */
+.btn-ver-mas {
+  background-color: transparent;
+  border: 2px solid #FF5FA2;
+  color: #333;
+  font-size: 1rem;
+  padding: 12px 30px;
+  transition: all 0.3s ease;
+  border-radius: 30px;
+  font-weight: 500;
+}
+.btn-ver-mas:hover {
+  background-color: #fff4e7;
+  color: #000;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(255, 95, 162, 0.3);
 }
