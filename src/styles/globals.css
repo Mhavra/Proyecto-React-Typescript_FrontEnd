@@ -1113,3 +1113,104 @@ body.dark .fcolor {
     gap: 0.5rem;
   }
 }
+
+/* ===== MEJORAS VISUALES ===== */
+
+/* Botones de agregar al carrito */
+.btn-add-cart {
+  background-color: #fd8aba;
+  color: white;
+  border: 2px solid #fd8aba;
+  border-radius: 6px;
+  padding: 10px 0;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+.btn-add-cart:hover {
+  background-color: #8be3eb;
+  border-color: #8be3eb;
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(139, 227, 235, 0.4);
+}
+
+/* Botón "Ver más productos" */
+.btn-ver-mas {
+  background-color: transparent;
+  border: 2px solid #FF5FA2;
+  color: #333;
+  font-size: 1rem;
+  padding: 12px 30px;
+  transition: all 0.3s ease;
+  border-radius: 30px;
+  font-weight: 500;
+}
+.btn-ver-mas:hover {
+  background-color: #fff4e7;
+  color: #000;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(255, 95, 162, 0.3);
+}
+
+/* Flechas del carrusel - mejor posicionamiento */
+.carousel-control-prev,
+.carousel-control-next {
+  width: 5%;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+.carousel-control-prev:hover,
+.carousel-control-next:hover {
+  opacity: 1;
+}
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  background-size: 60% 60%;
+  filter: invert(1);
+}
+@media (max-width: 768px) {
+  .carousel-control-prev,
+  .carousel-control-next {
+    width: 10%;
+  }
+}
+
+/* Espaciado entre slides y bordes */
+.carousel-item {
+  padding: 0.5rem 0;
+}
+.carousel-item .row {
+  margin: 0 -0.5rem;
+}
+.carousel-item .col-6,
+.carousel-item .col-md-3 {
+  padding: 0 0.5rem;
+}
+
+/* Botón de "Agregar al carrito" (estilo original) */
+.btn-add-cart {
+  background-color: #fd8aba;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 0;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
+}
+.btn-add-cart:hover {
+  background-color: #8be3eb;
+}
+
+/* Botón "Ver más productos" */
+.btn-ver-mas {
+  background-color: transparent;
+  border: 1px solid #FF5FA2;
+  color: #333;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  border-radius: 30px;
+}
+.btn-ver-mas:hover {
+  background-color: #fff4e7;
+  color: #000;
+}

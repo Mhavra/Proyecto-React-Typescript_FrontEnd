@@ -96,9 +96,16 @@ export default function Header() {
           </button>
 
           {/* Login / Logout */}
+           {/* Login / Logout con enlace a dashboard para admin */}
           {isAuthenticated ? (
             <div className="d-flex align-items-center gap-2 ms-2">
-              <span className="text-muted small">{user?.nombre}</span>
+              {user?.rol === 'admin' ? (
+                <Link to="/dashboard" className="text-decoration-none text-muted small fw-bold">
+                  {user?.nombre}
+                </Link>
+              ) : (
+                <span className="text-muted small">{user?.nombre}</span>
+              )}
               <button
                 className="btn btn-outline-danger btn-sm"
                 onClick={handleLogout}
@@ -106,7 +113,7 @@ export default function Header() {
                 Salir
               </button>
             </div>
-          ) : (
+            ) : (
             <Link to="/login" className="btn btn-outline-primary btn-sm ms-2">
               Iniciar sesión
             </Link>

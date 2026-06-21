@@ -41,6 +41,7 @@ Inicializar el proyecto
 En CMD, la carpeta del proyecto raiz:
 -npm install / yarn install
 -npm run dev / yarn dev
+-npm install @popperjs/core 
 
 Listado de secciones que tendrá el sitio web.
 --------------------------
