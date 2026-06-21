@@ -1,5 +1,5 @@
 // src/pages/_app.tsx
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate} from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import PrivateRoute from '@/components/common/PrivateRoute';
 import AdminLayout from '@/components/common/Layout';
@@ -28,6 +28,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 
 function AppRoutes() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   // Inicializar productos por defecto
   useEffect(() => {
