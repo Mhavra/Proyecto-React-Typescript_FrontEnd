@@ -21,6 +21,9 @@ export interface Producto {
 export interface Pedido {
   id: number;
   cliente: string;
+  email?: string;          
+  direccion?: string;      
+  telefono?: string;       
   fecha: string;
   productos: { id: string | number; cantidad: number; precio: number }[];
   total: number;
