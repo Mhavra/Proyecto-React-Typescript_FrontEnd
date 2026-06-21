@@ -2,7 +2,7 @@
 
 import Header from '@/components/common/Header';
 import Footer from '@/components/common/Footer';
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 
 export default function AcercaDeNosotrosPage() {
   return (
@@ -42,7 +42,7 @@ export default function AcercaDeNosotrosPage() {
 
           <div className="about-final text-center">
             <p className="about-quote">Más que papelería, pequeños detalles que inspiran.</p>
-            <Link href="/" className="btn-productos">Ver productos</Link>
+            <Link to="/" className="btn-productos">Ver productos</Link>
           </div>
         </section>
       </main>

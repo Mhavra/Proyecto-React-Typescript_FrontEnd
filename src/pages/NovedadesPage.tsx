@@ -1,15 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useLocation } from 'react-router-dom';
 import Header from '@/components/common/Header';
 import Footer from '@/components/common/Footer';
 import { storage, STORAGE_KEYS } from '@/services/localStorageService';
 import { Producto } from '@/interfaces';
 
 export default function NovedadesPage() {
-  const searchParams = useSearchParams();
-  const initialSearch = searchParams.get('search') || '';
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const initialSearch = queryParams.get('search') || '';
+
   const [allProducts, setAllProducts] = useState<Producto[]>([]);
   const [filtered, setFiltered] = useState<Producto[]>([]);
   const [searchTerm, setSearchTerm] = useState(initialSearch);
@@ -79,7 +81,7 @@ export default function NovedadesPage() {
         </section>
 
         <div className="container my-5">
-          <div className="row g-4" id="allProductsContainer">
+          <div className="row g-4">
             {filtered.map(prod => (
               <div key={prod.id} className="col-6 col-md-3 mb-4">
                 <div className="card border-0 h-100">

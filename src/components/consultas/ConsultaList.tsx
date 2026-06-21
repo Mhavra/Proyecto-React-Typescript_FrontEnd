@@ -13,8 +13,8 @@ import { Consulta } from '@/interfaces';
 
 interface ConsultaListProps {
   consultas: Consulta[];
-  onCambiarEstado: (id: string, nuevoEstado: 'leida' | 'respondida') => void;
-  onDelete: (id: string) => void;
+  onCambiarEstado: (id: number, nuevoEstado: 'leida' | 'respondida') => void;
+  onDelete: (id: number) => void;
 }
 
 export default function ConsultaList({ consultas, onCambiarEstado, onDelete }: ConsultaListProps) {
@@ -58,8 +58,10 @@ export default function ConsultaList({ consultas, onCambiarEstado, onDelete }: C
           <table className="table table-hover mb-0">
             <thead className="bg-light">
               <tr>
-                <th>Cliente</th>
-                <th>Consulta</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Email</th>
+                <th>Motivo</th>
                 <th>Fecha / Hora</th>
                 <th>Estado</th>
                 <th className="text-end">Acciones</th>
@@ -68,13 +70,11 @@ export default function ConsultaList({ consultas, onCambiarEstado, onDelete }: C
             <tbody>
               {consultas.map((consulta) => (
                 <tr key={consulta.id}>
-                  <td>
-                    <span className="fw-semibold">{consulta.cliente}</span>
-                  </td>
-                  <td>
-                    <div style={{ maxWidth: 200 }} className="text-truncate">
-                      {consulta.consulta}
-                    </div>
+                  <td>{consulta.nombre}</td>
+                  <td>{consulta.apellido}</td>
+                  <td>{consulta.email}</td>
+                  <td style={{ maxWidth: 150 }} className="text-truncate">
+                    {consulta.motivo}
                   </td>
                   <td>
                     {consulta.fecha}

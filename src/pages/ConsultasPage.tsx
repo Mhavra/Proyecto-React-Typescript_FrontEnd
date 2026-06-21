@@ -1,5 +1,5 @@
 /**
- * CONSULTAS PAGE - Gestión de consultas
+ * CONSULTAS PAGE - Gestión de consultas de clientes
  * 
  * @page /consultas
  */
@@ -21,25 +21,24 @@ export default function ConsultasPage() {
   /**
    * Filtra consultas por estado y cliente
    */
-  const consultasFiltradas = consultas.filter(c => {
+        const consultasFiltradas = consultas.filter(c => {
     const matchesEstado = filtroEstado === 'todas' ? true : c.estado === filtroEstado;
-    const matchesSearch = c.cliente.toLowerCase().includes(search.toLowerCase()) ||
-                          c.consulta.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = c.nombre.toLowerCase().includes(search.toLowerCase()) ||
+                          c.apellido.toLowerCase().includes(search.toLowerCase()) ||
+                          c.email.toLowerCase().includes(search.toLowerCase());
     return matchesEstado && matchesSearch;
   });
-
-  /**
+   /**
    * Cambia el estado de una consulta
    */
-  const handleCambiarEstado = (id: string, nuevoEstado: 'leida' | 'respondida') => {
-    storage.updateItem<Consulta>(STORAGE_KEYS.CONSULTAS, id, { estado: nuevoEstado });
-    setConsultas(storage.get<Consulta>(STORAGE_KEYS.CONSULTAS));
-  };
-
-  /**
+  const handleCambiarEstado = (id: number, nuevoEstado: 'leida' | 'respondida') => {
+  storage.updateItem<Consulta>(STORAGE_KEYS.CONSULTAS, id, { estado: nuevoEstado });
+  setConsultas(storage.get<Consulta>(STORAGE_KEYS.CONSULTAS));
+    };
+ /**
    * Elimina una consulta
    */
-  const handleDelete = (id: string) => {
+  const handleDelete = (id: number) => {
     if (confirm('¿Eliminar esta consulta?')) {
       storage.deleteItem<Consulta>(STORAGE_KEYS.CONSULTAS, id);
       setConsultas(storage.get<Consulta>(STORAGE_KEYS.CONSULTAS));
@@ -79,7 +78,7 @@ export default function ConsultasPage() {
       </div>
 
       <SearchBar
-        placeholder="Buscar por cliente o consulta..."
+        placeholder="Buscar por nombre, apellido o email..."
         value={search}
         onChange={setSearch}
         className="mb-3"

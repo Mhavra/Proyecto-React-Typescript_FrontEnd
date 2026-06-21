@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 
 export default function Footer() {
   return (
@@ -8,7 +8,7 @@ export default function Footer() {
       <div className="container">
         <div className="row">
           <div className="col-md-2 text-left">
-            <Link href="/" title="Ir al inicio">
+            <Link to="/" title="Ir al inicio">
               <img src="/assets/img/Foto_Empresa.webp" alt="Logo Empresa" className="logo-empresa" />
             </Link>
             <h5>Síguenos</h5>
@@ -28,9 +28,9 @@ export default function Footer() {
 
           <div className="col-md-3 text-center">
             <p className="footer-title">Más Información</p>
-            <Link href="/acerca-de-nosotros" className="footer-link">Acerca de nosotros</Link>
-            <Link href="#" className="footer-link">Más información sobre distribución</Link>
-            <Link href="#" className="footer-link">Trabaja con nosotros</Link>
+            <Link to="/acerca-de-nosotros" className="footer-link">Acerca de nosotros</Link>
+            <Link to="#" className="footer-link">Más información sobre distribución</Link>
+            <Link to="#" className="footer-link">Trabaja con nosotros</Link>
           </div>
 
           <div className="col-md-3 text-center footer-contacto">
@@ -43,13 +43,13 @@ export default function Footer() {
 
           <div className="col-md-3 text-right">
             <p className="footer-title">Ayuda</p>
-            <Link href="/servicio-cliente" className="footer-link">Servicio al Cliente</Link>
-            <Link href="#" className="footer-link">Preguntas Frecuentes</Link>
-            <Link href="#" className="footer-link">Información de Despachos</Link>
-            <Link href="#" className="footer-link">Formas de pago</Link>
-            <Link href="#" className="footer-link">Cambios y Devoluciones</Link>
-            <Link href="#" className="footer-link">Términos de Condiciones</Link>
-            <Link href="#" className="footer-link">Políticas de Privacidad</Link>
+            <Link to="/servicio-cliente" className="footer-link">Servicio al Cliente</Link>
+            <Link to="#" className="footer-link">Preguntas Frecuentes</Link>
+            <Link to="#" className="footer-link">Información de Despachos</Link>
+            <Link to="#" className="footer-link">Formas de pago</Link>
+            <Link to="#" className="footer-link">Cambios y Devoluciones</Link>
+            <Link to="#" className="footer-link">Términos de Condiciones</Link>
+            <Link to="#" className="footer-link">Políticas de Privacidad</Link>
           </div>
         </div>
         <p className="text-center mt-3">© 2026 Frenesí Papelería, Todos los derechos reservados.</p>

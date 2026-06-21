@@ -17,20 +17,8 @@ import { storage, STORAGE_KEYS } from '@/services/localStorageService';
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const DEFAULT_USERS: Usuario[] = [
-  {
-    id: 1,
-    nombre: 'Administrador',
-    email: 'admin@frenesi.cl',
-    password: '123456',
-    rol: 'admin',
-  },
-  {
-    id: 2,
-    nombre: 'Cliente Demo',
-    email: 'cliente@frenesi.cl',
-    password: '123456',
-    rol: 'cliente',
-  },
+  { id: 1, nombre: 'Administrador', email: 'admin@frenesi.cl', password: '123456', rol: 'admin' },
+  { id: 2, nombre: 'Cliente Demo', email: 'cliente@frenesi.cl', password: '123456', rol: 'cliente' },
 ];
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -39,9 +27,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Cargar sesión desde localStorage
-    const session = storage.getItemById<{ userId: number }>(STORAGE_KEYS.SESSION, 1);
-    if (session) {
+    // Cargar sesión desde localStorage    
+    const sessions = storage.get<{ userId: number }>(STORAGE_KEYS.SESSION);
+    if (sessions.length > 0) {
+      const session = sessions[0];
       const users = storage.get<Usuario>(STORAGE_KEYS.USUARIOS);
       const foundUser = users.find(u => u.id === session.userId);
       if (foundUser) {
@@ -58,13 +47,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       storage.setItem(STORAGE_KEYS.USUARIOS, DEFAULT_USERS);
       users = DEFAULT_USERS;
     }
-
     const foundUser = users.find(u => u.email === email && u.password === password);
     if (foundUser) {
       setUser(foundUser);
       setIsAuthenticated(true);
       // Guardar sesión
-      storage.addItem(STORAGE_KEYS.SESSION, { userId: foundUser.id });
+        storage.setItem(STORAGE_KEYS.SESSION, [{ userId: foundUser.id }]);
       return true;
     }
     return false;

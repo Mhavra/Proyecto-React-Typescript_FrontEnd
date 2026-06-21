@@ -1,8 +1,8 @@
-// src/App.tsx
+// src/pages/_app.tsx
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import PrivateRoute from '@/components/common/PrivateRoute';
-import AdminLayout from '@/components/common/Layout'; // aum mo lo creo
+import AdminLayout from '@/components/common/Layout';
 import LoginPage from '@/pages/LoginPage';
 import TiendaPage from '@/pages/TiendaPage';
 import NovedadesPage from '@/pages/NovedadesPage';
@@ -15,9 +15,10 @@ import ProductoDetallePage from '@/pages/ProductoDetallePage';
 import PedidosPage from '@/pages/PedidosPage';
 import ConsultasPage from '@/pages/ConsultasPage';
 import UsuariosPage from '@/pages/UsuariosPage';
-import '@/styles/globals.css';
+import '../styles/globals.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
+
 
 function AppRoutes() {
   const { user, logout } = useAuth();

@@ -81,16 +81,23 @@ export default function UsuarioForm({ usuario, onSave, onCancel }: UsuarioFormPr
             required={!usuario}
           />
         </div>
-        
+        <div className="col-12 col-md-6 mb-3">
+          <label className="form-label fw-semibold">Rol</label>
+          <select
+            className="form-select"
+            value={formData.rol}
+            onChange={(e) => setFormData({ ...formData, rol: e.target.value as 'admin' | 'cliente' })}
+          >
+            <option value="cliente">Cliente</option>
+            <option value="admin">Administrador</option>
+          </select>
+        </div>
       </div>
       <div className="d-flex gap-2">
         <button type="submit" className="btn" style={{ backgroundColor: '#6f42c1', color: 'white' }}>
-          <i className="bi bi-save me-1"></i>
-          Guardar
+          <i className="bi bi-save me-1"></i> Guardar
         </button>
-        <button type="button" className="btn btn-secondary" onClick={onCancel}>
-          Cancelar
-        </button>
+        <button type="button" className="btn btn-secondary" onClick={onCancel}>Cancelar</button>
       </div>
     </form>
   );
