@@ -15,6 +15,12 @@ import ProductoDetallePage from '@/pages/ProductoDetallePage';
 import PedidosPage from '@/pages/PedidosPage';
 import ConsultasPage from '@/pages/ConsultasPage';
 import UsuariosPage from '@/pages/UsuariosPage';
+
+import { storage, STORAGE_KEYS } from '@/services/localStorageService';
+import { useEffect } from 'react';
+import { defaultProducts } from '@/data/defaultProducts';
+import { Producto } from '@/interfaces';
+
 import '../styles/globals.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
@@ -22,6 +28,19 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 
 function AppRoutes() {
   const { user, logout } = useAuth();
+
+  // Inicializar productos por defecto
+  useEffect(() => {
+    const products = storage.get<Producto>(STORAGE_KEYS.PRODUCTOS);
+    if (products.length === 0) {
+      storage.setItem(STORAGE_KEYS.PRODUCTOS, defaultProducts);
+    }
+  }, []);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
     <Routes>
