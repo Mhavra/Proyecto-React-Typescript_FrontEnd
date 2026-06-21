@@ -31,10 +31,14 @@ export default function ConsultasPage() {
    /**
    * Cambia el estado de una consulta
    */
-  const handleCambiarEstado = (id: number, nuevoEstado: 'leida' | 'respondida') => {
-  storage.updateItem<Consulta>(STORAGE_KEYS.CONSULTAS, id, { estado: nuevoEstado });
-  setConsultas(storage.get<Consulta>(STORAGE_KEYS.CONSULTAS));
-    };
+  const handleCambiarEstado = (id: number, nuevoEstado: 'leida' | 'respondida', respuesta?: string) => {
+    const updates: Partial<Consulta> = { estado: nuevoEstado };
+    if (respuesta !== undefined) {
+      updates.respuesta = respuesta;
+    }
+    storage.updateItem<Consulta>(STORAGE_KEYS.CONSULTAS, id, updates);
+    setConsultas(storage.get<Consulta>(STORAGE_KEYS.CONSULTAS));
+  };
  /**
    * Elimina una consulta
    */

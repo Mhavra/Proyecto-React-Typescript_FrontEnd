@@ -1100,3 +1100,16 @@ body.dark .fcolor {
 #tablaRegistros th {
   background-color: #dc8aff;
 }
+
+/* Desktop: menú horizontal */
+@media (min-width: 993px) {
+  .menu-domi {
+    display: flex !important;
+    justify-content: center;
+  }
+  .menu-domi .navbar-nav {
+    flex-direction: row !important;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+}

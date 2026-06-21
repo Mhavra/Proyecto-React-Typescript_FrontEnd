@@ -45,6 +45,9 @@
       "@styles": [
         "src/styles"
       ],
+      "@data": [
+        "src/data"
+      ],
       "public/*": [
         "public/assets/img/img_productos/*"
       ]
