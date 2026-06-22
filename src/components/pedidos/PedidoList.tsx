@@ -6,6 +6,7 @@
 
 'use client';
 
+// src/components/pedidos/PedidoList.tsx
 import { Pedido } from '@/interfaces';
 
 interface PedidoListProps {
@@ -15,7 +16,10 @@ interface PedidoListProps {
 }
 
 export default function PedidoList({ pedidos, onCambiarEstado, onDelete }: PedidoListProps) {
-  if (pedidos.length === 0) {
+  // Si pedidos es undefined o null, inicializar como array vacío (por seguridad)
+  const safePedidos = pedidos || [];
+
+  if (safePedidos.length === 0) {
     return (
       <div className="text-center text-muted py-5">
         <i className="bi bi-inbox fs-1 d-block mb-3"></i>
@@ -41,6 +45,9 @@ export default function PedidoList({ pedidos, onCambiarEstado, onDelete }: Pedid
             <thead className="bg-light">
               <tr>
                 <th>Cliente</th>
+                <th>Email</th>
+                <th>Dirección</th>
+                <th>Teléfono</th>
                 <th>Fecha</th>
                 <th>Total</th>
                 <th>Estado</th>
@@ -48,13 +55,16 @@ export default function PedidoList({ pedidos, onCambiarEstado, onDelete }: Pedid
               </tr>
             </thead>
             <tbody>
-              {pedidos.map((pedido) => (
+              {safePedidos.map((pedido) => (
                 <tr key={pedido.id}>
                   <td>
                     <span className="fw-semibold">{pedido.cliente}</span>
                     <br />
                     <small className="text-muted">{pedido.productos.length} productos</small>
                   </td>
+                  <td>{pedido.email || '-'}</td>
+                  <td>{pedido.direccion || '-'}</td>
+                  <td>{pedido.telefono || '-'}</td>
                   <td>{pedido.fecha}</td>
                   <td>${pedido.total.toLocaleString()}</td>
                   <td>

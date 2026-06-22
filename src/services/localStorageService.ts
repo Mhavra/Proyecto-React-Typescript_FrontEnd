@@ -8,7 +8,7 @@ const getItem = <T>(key:string): T[] => {
     if (typeof window === 'undefined') return [];{
         const data = localStorage.getItem(key);
         return data ? JSON.parse(data) : [];
-    }}
+}}
 
 /**
 Servicio de persistencia de datos 
