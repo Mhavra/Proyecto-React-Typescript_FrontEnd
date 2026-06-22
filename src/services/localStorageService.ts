@@ -4,6 +4,9 @@
  * @returns Array de elementos
  */
 
+/* Este constante getItem obtiene el array de localstore segun la key del data,
+si no hay, return vacio
+*/ 
 const getItem = <T>(key:string): T[] => {
     if (typeof window === 'undefined') return [];{
         const data = localStorage.getItem(key);
@@ -12,11 +15,9 @@ const getItem = <T>(key:string): T[] => {
 
 /**
 Servicio de persistencia de datos 
-Proporciona funciones genéricas para operaciones CRUD en localStorage.
-Ahora los IDs son numéricos.
+da funciones genéricas para operaciones CRUD en localStorage.
 @module services/localStorageService
 */
-
 
 /**
  Guarda un array en localStorage
