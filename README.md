@@ -1,6 +1,6 @@
 # Proyecto-React-Typescript_FrontEnd
 
-*Contexto para la tercera etapa (Intranet React + TypeScript)*
+## *Contexto para la tercera etapa (Intranet React + TypeScript)*
 Frenesí Papelería necesita una herramienta de gestión interna que permita a la dueña administrar el inventario, procesar pedidos, atender consultas y gestionar usuarios de forma centralizada y ágil. Actualmente, estas tareas se realizan manualmente (revisión de mensajes, actualización de stock en archivos externos), lo que genera demoras, errores y sobrecarga de trabajo. La intranet propuesta automatizará estos procesos y dará trazabilidad a las operaciones del negocio, conectando directamente con los datos generados por el sitio web público (carrito de compras y formulario de contacto).
 
 Necesidad digital identificada
@@ -15,7 +15,7 @@ La dueña necesita una plataforma que le permita:
 
 -Administrar los usuarios internos que tendrán acceso al sistema.
 
--Tener un dashboard con indicadores clave (productos totales, pedidos pendientes, consultas no leídas).
+-Tener un dashboard con indicadores clave (productos totales, pedidos pendientes, consultas no leídas y cantidad de usuarios).
 
 -Todo esto en una interfaz protegida por login, con persistencia de datos y navegación fluida.
 
@@ -43,18 +43,52 @@ En CMD, la carpeta del proyecto raiz:
 -npm run dev / yarn dev
 
 -npm install @popperjs/core 
+## Tecnologías Utilizadas
+----------------
+- **React 18** con **TypeScript**: Para construir una interfaz de usuario robusta y tipada.
+- **React Router DOM**: Para la navegación sin recarga de página (SPA).
+- **Bootstrap 5**: Para los estilos y componentes visuales.
+- **localStorage**: Para la persistencia de datos en el navegador.
+- **Context API**: Para la gestión del estado de autenticación.
 
-Listado de secciones que tendrá el sitio web.
+## Instalación y Ejecución Local
+--------------------
+Para ejecutar el proyecto en tu máquina local, sigue estos pasos:
+
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/Mhavra/Proyecto-React-Typescript_FrontEnd.git
+
+# 2. Navegar al directorio del proyecto
+cd Proyecto-React-Typescript_FrontEnd
+
+# 3. Instalar las dependencias
+npm install  / yarn install
+
+# 4. Instalar dependencias adicionales para Bootstrap, por si lo pide
+npm install @popperjs/core 
+
+# 5. Ejecutar el servidor de desarrollo
+npm run dev
+
+## Listado de secciones que tendrá el sitio web.
 --------------------------
 -Inicio
+
 -Nosotros
+
 -Novedades
+
 -Carrito
+
 -Correo ayuda
+
 -Panel de administrador
 
-Integrantes del grupo con sus respectivos roles.
+## Integrantes del grupo.
 ------------------------------------
 -Nayaret Larrondo
+
 -Fram Salinas
+
 -Nilson Oyarce
