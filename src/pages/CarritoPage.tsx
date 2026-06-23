@@ -131,7 +131,7 @@ export default function CarritoPage() {
     // Expresión regular mejorada para email
     // - Parte local: letras, números, puntos, guiones bajos y guiones
     // - @ seguido de letras (sin números) y puntos
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z]+\.[a-zA-Z]{2,}$/;
+    const emailRegex = /^[a-zA-Z0-9._]+@[a-zA-Z]+\.[a-zA-Z]{2,}$/;
     
     if (!emailRegex.test(value.trim())) {
       return 'Ingresa un correo válido (ejemplo: usuario@dominio.com).';
