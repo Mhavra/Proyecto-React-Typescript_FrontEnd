@@ -22,6 +22,7 @@ interface PrivateRouteProps {
 }
 
 export default function PrivateRoute({ children, allowedRoles = ['admin'] }: PrivateRouteProps) {
+  //esta funciona con useAuth para obtener el estado de autenticación y el usuario actual
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
@@ -29,7 +30,7 @@ export default function PrivateRoute({ children, allowedRoles = ['admin'] }: Pri
    * Efecto que verifica la autenticación y los roles
    * Redirige según corresponda
    */
-  useEffect(() => {
+  useEffect(() => { //useeffect sirve para rediriguir 
     // Si no está autenticado, redirigir al login
     if (!isAuthenticated) {
       navigate('/login');
