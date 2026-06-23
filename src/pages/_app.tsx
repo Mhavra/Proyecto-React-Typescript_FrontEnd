@@ -75,7 +75,8 @@ function AppRoutes() {
         }
       />
       <Route
-        path="/productos/:id"
+        path="/productos/:id" 
+        //ruta dinamica para detalle de producto, se pasa el id del producto en la url usando useParams en ProductoDetallePage
         element={
           <PrivateRoute allowedRoles={['admin']}>
             <AdminLayout user={user!} onLogout={logout}>

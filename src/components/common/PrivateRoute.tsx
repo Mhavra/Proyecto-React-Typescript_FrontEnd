@@ -16,7 +16,8 @@ import { useAuth } from '@/context/AuthContext'; //useAuth para obtener el estad
  */
 
 interface PrivateRouteProps {
-  children: React.ReactNode;
+  children: React.ReactNode; 
+  //children es el escudo que protege las rutas, si pasa la verificación, renderiza los hijos y se ve pues
   allowedRoles?: string[]; // opcional, por defecto solo admin
 }
 
