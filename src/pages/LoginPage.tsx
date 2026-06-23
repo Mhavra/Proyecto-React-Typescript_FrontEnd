@@ -16,13 +16,16 @@ import { storage, STORAGE_KEYS } from '@/services/localStorageService';
 import { Usuario } from '@/interfaces';
 
 export default function LoginPage() {
+  // Estados para el formulario de login
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  // Hook de autenticación y navegación
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  // Estados para el formulario de registro
   const [isRegistering, setIsRegistering] = useState(false);
   const [regNombre, setRegNombre] = useState('');
   const [regEmail, setRegEmail] = useState('');
@@ -30,6 +33,12 @@ export default function LoginPage() {
   const [regConfirm, setRegConfirm] = useState('');
   const [regError, setRegError] = useState('');
 
+  /**
+   * Maneja el inicio de sesión
+   * - Valida credenciales con el contexto de autenticación
+   * - Si es exitoso, redirige al dashboard
+   * - Si falla, muestra mensaje de error
+   */
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -48,37 +57,51 @@ export default function LoginPage() {
     }
   };
 
+  /**
+   * Maneja el registro de nuevos usuarios
+   * - Valida los datos del formulario
+   * - Verifica que el correo no esté registrado
+   * - Crea un nuevo usuario y lo agrega al almacenamiento local
+   */
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
     setRegError('');
+
+    // Validación del nombre
     if (!regNombre.trim() || regNombre.length < 3) {
       setRegError('El nombre debe tener al menos 3 caracteres.');
       return;
     }
+    // Validación del email
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(regEmail)) {
       setRegError('Correo electrónico inválido.');
       return;
     }
+    // Validación de la contraseña
     if (regPassword.length < 4) {
       setRegError('La contraseña debe tener al menos 4 caracteres.');
       return;
     }
+    // Verificar que las contraseñas coincidan
     if (regPassword !== regConfirm) {
       setRegError('Las contraseñas no coinciden.');
       return;
     }
+    // Verificar que el email no esté registrado
     const users = storage.get<Usuario>(STORAGE_KEYS.USUARIOS);
     if (users.some(u => u.email === regEmail)) {
       setRegError('Este correo ya está registrado.');
       return;
     }
+    // Crear el nuevo usuario
     const newUser: Omit<Usuario, 'id'> = {
       nombre: regNombre.trim(),
       email: regEmail.trim(),
       password: regPassword,
-      rol: 'cliente',
+      rol: 'cliente', // Por defecto, los nuevos usuarios son clientes
     };
     storage.addItem<Usuario>(STORAGE_KEYS.USUARIOS, newUser);
+    // Limpiar formulario y mostrar éxito
     setRegError('');
     alert('¡Registro exitoso! Ahora inicia sesión.');
     setIsRegistering(false);
@@ -94,6 +117,7 @@ export default function LoginPage() {
         <div className="col-12 col-sm-10 col-md-8 col-lg-5 col-xl-4">
           <div className="card shadow-lg border-0 rounded-4">
             <div className="card-body p-4">
+              {/* Logo y título */}
               <div className="text-center mb-3">
                 <img
                   src="/assets/img/logo-sin-letras.png"
@@ -106,6 +130,7 @@ export default function LoginPage() {
                 <p className="text-muted small">Papelería · Intranet</p>
               </div>
 
+              {/* Botón para volver a la tienda */}
               <button
                 className="btn btn-outline-secondary w-100 mb-3 btn-sm"
                 onClick={() => navigate('/')}
@@ -114,6 +139,7 @@ export default function LoginPage() {
               </button>
 
               {!isRegistering ? (
+                // --- FORMULARIO DE LOGIN ---
                 <>
                   <form onSubmit={handleLogin}>
                     <div className="mb-2">
@@ -148,6 +174,8 @@ export default function LoginPage() {
                       {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
                     </button>
                   </form>
+
+                  {/* Enlace a registro */}
                   <div className="mt-2 text-center">
                     <button
                       className="btn btn-link btn-sm p-0"
@@ -156,6 +184,8 @@ export default function LoginPage() {
                       ¿No tienes cuenta? Regístrate aquí
                     </button>
                   </div>
+
+                  {/* Credenciales de prueba */}
                   <div className="mt-2 text-center">
                     <small className="text-muted">
                       <strong>Credenciales de prueba:</strong><br />
@@ -165,6 +195,7 @@ export default function LoginPage() {
                   </div>
                 </>
               ) : (
+                // --- FORMULARIO DE REGISTRO ---
                 <>
                   <form onSubmit={handleRegister}>
                     <div className="mb-2">
@@ -220,6 +251,8 @@ export default function LoginPage() {
                       Registrarse
                     </button>
                   </form>
+
+                  {/* Enlace a login */}
                   <div className="mt-2 text-center">
                     <button
                       className="btn btn-link btn-sm p-0"

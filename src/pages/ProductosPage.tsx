@@ -77,6 +77,7 @@ export default function ProductosPage() {
 
   return (
     <div>
+      {/* Header con título y botón de nuevo producto */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h4 className="fw-bold mb-0">Productos</h4>
         <button
@@ -88,12 +89,14 @@ export default function ProductosPage() {
         </button>
       </div>
 
+      {/* Barra de búsqueda */}
       <SearchBar
         placeholder="Buscar productos por nombre o categoría..."
         value={search}
         onChange={setSearch}
       />
 
+      {/* Formulario de producto (se muestra en creación/edición) */}
       {showForm && (
         <div className="card shadow-sm mb-4">
           <div className="card-body">
@@ -109,6 +112,7 @@ export default function ProductosPage() {
         </div>
       )}
 
+      {/* Lista de productos */}
       <ProductoList
         productos={filteredProductos}
         onEdit={handleEdit}

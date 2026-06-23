@@ -15,6 +15,7 @@ interface UsuarioListProps {
 }
 
 export default function UsuarioList({ usuarios, onEdit, onDelete }: UsuarioListProps) {
+  // Si no hay usuarios, mostrar mensaje
   if (usuarios.length === 0) {
     return (
       <div className="text-center text-muted py-5">
@@ -24,6 +25,9 @@ export default function UsuarioList({ usuarios, onEdit, onDelete }: UsuarioListP
     );
   }
 
+  /**
+   * Obtiene la clase CSS para el badge según el rol
+   */
   const getRolColor = (rol: string) => {
     const colors: Record<string, string> = {
       admin: 'bg-danger text-white',
@@ -58,6 +62,7 @@ export default function UsuarioList({ usuarios, onEdit, onDelete }: UsuarioListP
                     </span>
                   </td>
                   <td className="text-end">
+                    {/* Botón de editar */}
                     <button
                       onClick={() => onEdit(usuario)}
                       className="btn btn-sm btn-outline-warning me-1"
@@ -65,6 +70,7 @@ export default function UsuarioList({ usuarios, onEdit, onDelete }: UsuarioListP
                     >
                       <i className="bi bi-pencil"></i>
                     </button>
+                    {/* Botón de eliminar */}
                     <button
                       onClick={() => onDelete(usuario.id)}
                       className="btn btn-sm btn-outline-danger"

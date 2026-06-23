@@ -15,6 +15,7 @@ interface UsuarioFormProps {
   onCancel: () => void;
 }
 
+// Estado del formulario
 export default function UsuarioForm({ usuario, onSave, onCancel }: UsuarioFormProps) {
   const [formData, setFormData] = useState<Omit<Usuario, 'id'>>({
     nombre: '',
@@ -23,19 +24,28 @@ export default function UsuarioForm({ usuario, onSave, onCancel }: UsuarioFormPr
     rol: 'cliente',
   });
 
+  /**
+   * Efecto para cargar los datos del usuario cuando se edita
+   */
   useEffect(() => {
     if (usuario) {
       setFormData({
         nombre: usuario.nombre,
         email: usuario.email,
-        password: '',
+        password: '', // La contraseña se deja vacía en edición
         rol: usuario.rol,
       });
     }
   }, [usuario]);
 
+  /**
+   * Maneja el envío del formulario
+   * En creación: la contraseña es obligatoria
+   * En edición: la contraseña es opcional
+   */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Validar que la contraseña esté presente en creación
     if (!formData.password && !usuario) {
       alert('La contraseña es obligatoria');
       return;
@@ -46,6 +56,7 @@ export default function UsuarioForm({ usuario, onSave, onCancel }: UsuarioFormPr
   return (
     <form onSubmit={handleSubmit}>
       <div className="row">
+        {/* Campo: Nombre */}
         <div className="col-12 col-md-6 mb-3">
           <label className="form-label fw-semibold">Nombre</label>
           <input
@@ -57,6 +68,8 @@ export default function UsuarioForm({ usuario, onSave, onCancel }: UsuarioFormPr
             required
           />
         </div>
+
+        {/* Campo: Email */}
         <div className="col-12 col-md-6 mb-3">
           <label className="form-label fw-semibold">Email</label>
           <input
@@ -68,6 +81,8 @@ export default function UsuarioForm({ usuario, onSave, onCancel }: UsuarioFormPr
             required
           />
         </div>
+
+        {/* Campo: Contraseña */}
         <div className="col-12 col-md-6 mb-3">
           <label className="form-label fw-semibold">
             {usuario ? 'Nueva contraseña (opcional)' : 'Contraseña'}
@@ -78,9 +93,11 @@ export default function UsuarioForm({ usuario, onSave, onCancel }: UsuarioFormPr
             placeholder={usuario ? 'Dejar vacío para mantener' : 'Contraseña...'}
             value={formData.password}
             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-            required={!usuario}
+            required={!usuario} // Solo obligatorio en creación
           />
         </div>
+
+        {/* Campo: Rol */}
         <div className="col-12 col-md-6 mb-3">
           <label className="form-label fw-semibold">Rol</label>
           <select
@@ -93,6 +110,7 @@ export default function UsuarioForm({ usuario, onSave, onCancel }: UsuarioFormPr
           </select>
         </div>
       </div>
+      {/* Botones de acción */}
       <div className="d-flex gap-2">
         <button type="submit" className="btn" style={{ backgroundColor: '#6f42c1', color: 'white' }}>
           <i className="bi bi-save me-1"></i> Guardar

@@ -14,6 +14,7 @@ import { storage } from '@/services/localStorageService';
  * @returns [valor, setValor]
  */
 export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T) => void] {
+  // Estado que sincroniza con localStorage
   const [storedValue, setStoredValue] = useState<T>(() => {
     try {
       const item = storage.getItem<T>(key);
@@ -24,6 +25,10 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T)
     }
   });
 
+  /**
+   * Función para actualizar el valor
+   * Guarda en localStorage y actualiza el estado
+   */
   const setValue = (value: T) => {
     try {
       const valueToStore = value instanceof Function ? value(storedValue) : value;

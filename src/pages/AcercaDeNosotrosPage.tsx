@@ -31,6 +31,7 @@ export default function AcercaDeNosotrosPage() {
             </div>
           </div>
 
+          {/* Tarjetas de valores */}
           <div className="row about-cards">
             <div className="mb-4">
               <div className="about-cards text-center">

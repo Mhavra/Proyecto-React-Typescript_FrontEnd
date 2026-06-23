@@ -19,6 +19,10 @@ interface LayoutProps {
   onLogout: () => void;
 }
 
+/**
+ * Configuración de navegación del sidebar
+ * Cada item tiene: nombre, ruta y ícono de Bootstrap Icons
+ */
 const navigation = [
   { name: 'Dashboard', path: '/dashboard', icon: 'bi bi-grid-1x2-fill' },
   { name: 'Productos', path: '/productos', icon: 'bi bi-box-seam-fill' },
@@ -28,24 +32,34 @@ const navigation = [
 ];
 
 export default function Layout({ children, user, onLogout }: LayoutProps) {
+  // Estado para modo oscuro
   const [isDarkMode, setIsDarkMode] = useState(false);
+  // Estado para menú móvil (sidebar colapsada)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
+  /**
+   * Efecto para cargar la preferencia de modo oscuro al montar el componente
+   */
   useEffect(() => {
     const darkMode = localStorage.getItem('darkMode') === 'true';
     setIsDarkMode(darkMode);
     if (darkMode) document.body.classList.add('dark');
   }, []);
 
+  /**
+   * Alterna entre modo claro y oscuro
+   */
   const toggleDarkMode = () => {
     const newMode = !isDarkMode;
     setIsDarkMode(newMode);
     localStorage.setItem('darkMode', String(newMode));
     document.body.classList.toggle('dark');
   };
-
+  /**
+   * Maneja el logout y redirige a la tienda
+   */
   const handleLogout = () => {
     onLogout();
     navigate('/'); // Redirige a TiendaPage
@@ -53,12 +67,15 @@ export default function Layout({ children, user, onLogout }: LayoutProps) {
 
   return (
     <div className="d-flex vh-100 overflow-hidden">
-      {/* Sidebar */}
+      {/* Sidebar - visible en desktop */}
       <div className="sidebar d-none d-md-flex flex-column flex-shrink-0">
+        {/* Encabezado del sidebar */}
         <div className="d-flex align-items-center px-4 py-3 border-bottom">
           <h5 className="fw-bold mb-0" style={{ color: '#6f42c1' }}>Frenesí</h5>
           <span className="ms-1 text-muted small">Intranet</span>
         </div>
+
+        {/* Navegación del sidebar */}
         <nav className="nav flex-column p-3 flex-grow-1">
           {navigation.map((item) => {
             const isActive = location.pathname === item.path;
@@ -74,6 +91,8 @@ export default function Layout({ children, user, onLogout }: LayoutProps) {
             );
           })}
         </nav>
+
+        {/* Pie de página del sidebar */}
         <div className="p-3 border-top">
           <small className="text-muted">Frenesí Papelería v1.0</small>
         </div>
@@ -81,7 +100,9 @@ export default function Layout({ children, user, onLogout }: LayoutProps) {
 
       {/* Contenido principal */}
       <div className="flex-grow-1 d-flex flex-column overflow-hidden">
+        {/* Header superior - visible en móvil y desktop */}
         <header className="bg-white border-bottom px-4 py-3 d-flex align-items-center justify-content-between">
+          {/* Botón para abrir menú móvil */}
           <button
             className="btn d-md-none"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -89,8 +110,10 @@ export default function Layout({ children, user, onLogout }: LayoutProps) {
             <i className="bi bi-list fs-4"></i>
           </button>
           <h5 className="mb-0 fw-semibold d-md-none">Frenesí</h5>
-
+          
+          {/* Acciones del usuario */}
           <div className="d-flex align-items-center gap-2 ms-auto">
+            {/* Botón de modo oscuro */}
             <button
               onClick={toggleDarkMode}
               className="btn btn-outline-secondary btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center"
@@ -98,11 +121,13 @@ export default function Layout({ children, user, onLogout }: LayoutProps) {
               <i className={`bi ${isDarkMode ? 'bi-sun-fill' : 'bi-moon-fill'}`}></i>
             </button>
 
+            {/* Información del usuario */}
             <div className="d-flex align-items-center gap-2">
               <div className="text-end d-none d-sm-block">
                 <div className="small fw-semibold text-dark">{user.nombre}</div>
                 <div className="small text-muted">{user.rol}</div>
               </div>
+              {/* Avatar (inicial del nombre) */}
               <div
                 className="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
                 style={{ width: 36, height: 36 }}
@@ -111,6 +136,7 @@ export default function Layout({ children, user, onLogout }: LayoutProps) {
               </div>
             </div>
 
+            {/* Botón de cerrar sesión */}
             <button onClick={handleLogout} className="btn btn-danger btn-sm px-3">
               <i className="bi bi-box-arrow-right me-1"></i>
               <span className="d-none d-sm-inline">Salir</span>
@@ -118,7 +144,7 @@ export default function Layout({ children, user, onLogout }: LayoutProps) {
           </div>
         </header>
 
-        {/* Menú móvil */}
+        {/* Menú móvil - se muestra cuando está abierto */}
         {isMobileMenuOpen && (
           <div className="d-md-none bg-white border-bottom p-3">
             {navigation.map((item) => {
@@ -137,7 +163,8 @@ export default function Layout({ children, user, onLogout }: LayoutProps) {
             })}
           </div>
         )}
-
+        
+        {/* Área de contenido principal */}
         <main className="flex-grow-1 overflow-auto p-4" style={{ backgroundColor: '#f8f9fa' }}>
           {children}
         </main>

@@ -48,11 +48,13 @@ export default function DashboardPage() {
    * Cargar estadísticas desde localStorage
    */
   useEffect(() => {
+    // Obtener datos desde localStorage
     const productos = storage.get<Producto>(STORAGE_KEYS.PRODUCTOS);
     const pedidos = storage.get<Pedido>(STORAGE_KEYS.PEDIDOS);
     const consultas = storage.get<Consulta>(STORAGE_KEYS.CONSULTAS);
     const usuarios = storage.get(STORAGE_KEYS.USUARIOS);
 
+    // Calcular estadísticas
     setStats({
       productos: productos.length,
       pedidosPendientes: pedidos.filter(p => p.estado === 'pendiente').length,
@@ -65,6 +67,7 @@ export default function DashboardPage() {
     <div>
       <h4 className="fw-bold mb-4">Dashboard</h4>
 
+      {/* Grid de tarjetas de estadísticas */}
       <div className="row g-3 mb-4">
         <StatCard
           title="Productos"
@@ -91,7 +94,8 @@ export default function DashboardPage() {
           color="bg-success"
         />
       </div>
-
+      
+      {/* Mensaje de bienvenida */}
       <div className="card shadow-sm">
         <div className="card-body">
           <h5 className="card-title">Bienvenido a la intranet</h5>
