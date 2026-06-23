@@ -1,12 +1,11 @@
 'use client';
 
-import { useEffect } from 'react'; //useEffect para redirigir si no está autenticado o no tiene el rol 
-import { useNavigate } from 'react-router-dom'; //useNavigate para redirigir a login o tienda según le coloque
+import { useEffect } from 'react'; //useEffect para decidir si al susuario lo debo redirigir a otro lado segun su estado
+import { useNavigate } from 'react-router-dom'; //useNavigate para redirigir a login o tienda según le cliquee
 import { useAuth } from '@/context/AuthContext'; //useAuth para obtener el estado de autenticación y el usuario actual
-
+//useeffect y usenavigate son 
 /**
  * PRIVATE ROUTE - Componente de protección de rutas
- * 
  * Solo permite el acceso a usuarios autenticados con los roles permitidos.
  * Redirige automáticamente a /login si no está autenticado,
  * o a / si no tiene el rol requerido.
