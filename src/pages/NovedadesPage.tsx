@@ -7,6 +7,15 @@ import Footer from '@/components/common/Footer';
 import { storage, STORAGE_KEYS } from '@/services/localStorageService';
 import { Producto } from '@/interfaces';
 
+/**
+ * NOVEDADES PAGE - Página de productos con búsqueda
+ * 
+ * Muestra todos los productos de la tienda con opción de búsqueda.
+ * Los productos se pueden filtrar por nombre o categoría.
+ * Incluye funcionalidad de "Agregar al carrito" con validación de stock.
+ * 
+ * @page /novedades
+ */
 export default function NovedadesPage() {
   // Obtener el término de búsqueda de la URL (si viene del header)
   const location = useLocation();
@@ -35,7 +44,7 @@ export default function NovedadesPage() {
       handleSearch(initialSearch);
     }
   }, [initialSearch]);
-  
+
   /**
    * Maneja la búsqueda de productos
    * Normaliza el texto (elimina acentos) para búsqueda insensible
@@ -48,13 +57,13 @@ export default function NovedadesPage() {
       .replace(/[\u0300-\u036f]/g, '')
       .toLowerCase()
       .trim();
-
+    
     // Si no hay término, mostrar todos los productos
     if (!normalized) {
       setFiltered(allProducts);
       return;
     }
-
+    
     // Filtrar productos que coincidan con la búsqueda
     const filtered = allProducts.filter(p =>
       // Buscar en nombre
@@ -72,6 +81,20 @@ export default function NovedadesPage() {
           .includes(normalized))
     );
     setFiltered(filtered);
+  };
+
+  /**
+   * Obtiene el stock de forma segura (maneja undefined)
+   */
+  const getStock = (prod: Producto): number => {
+    return prod.stock !== undefined ? prod.stock : 0;
+  };
+
+  /**
+   * Verifica si un producto tiene stock
+   */
+  const hasStock = (prod: Producto): boolean => {
+    return getStock(prod) > 0;
   };
 
   return (
@@ -104,42 +127,66 @@ export default function NovedadesPage() {
         {/* Grid de productos */}
         <div className="container my-5">
           <div className="row g-4">
-            {filtered.map(prod => (
-              <div key={prod.id} className="col-6 col-md-3 mb-4">
-                <div className="card border-0 h-100">
-                  <div className="card-img-top">
-                    <img src={prod.imagen} alt={prod.nombre} style={{ width: '100%', aspectRatio: '1/1', objectFit: 'contain' }} />
-                  </div>
-                  <div className="card-body p-0 mt-3 text-center">
-                    <div className="product-title">{prod.nombre}</div>
-                    <div className="product-category small text-muted">{prod.categoria || ''}</div>
-                    {/* 🔹 Descripción agregada */}
-                    {prod.descripcion && (
-                      <div className="product-description small text-muted mt-1" style={{ fontSize: '0.8rem', padding: '0 8px' }}>
-                        {prod.descripcion.length > 60 ? prod.descripcion.substring(0, 60) + '...' : prod.descripcion}
+            {filtered.map(prod => {
+              const stock = getStock(prod);
+              const inStock = stock > 0;
+              
+              return (
+                <div key={prod.id} className="col-6 col-md-3 mb-4">
+                  <div className="card border-0 h-100 position-relative">
+                    {/* Overlay "Sin stock" - se muestra si el stock es 0 */}
+                    {!inStock && (
+                      <div className="position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex align-items-center justify-content-center" style={{ zIndex: 10, borderRadius: '8px' }}>
+                        <span className="text-white fw-bold fs-4">Sin stock</span>
                       </div>
                     )}
-                    <div className="product-price">${prod.precio}</div>
-                    <button
-                      className="btn btn-add-cart w-100 mt-2"
-                      onClick={() => {
-                        const cart = JSON.parse(localStorage.getItem('frenesiCarrito') || '[]');
-                        const existing = cart.find((item: any) => String(item.id) === String(prod.id));
-                        if (existing) {
-                          existing.cantidad += 1;
-                        } else {
-                          cart.push({ id: prod.id, nombre: prod.nombre, precio: prod.precio, cantidad: 1 });
-                        }
-                        localStorage.setItem('frenesiCarrito', JSON.stringify(cart));
-                        window.dispatchEvent(new Event('storage'));
-                      }}
-                    >
-                      Agregar al carrito
-                    </button>
+                    {/* Imagen del producto */}
+                    <div className="card-img-top">
+                      <img src={prod.imagen} alt={prod.nombre} style={{ width: '100%', aspectRatio: '1/1', objectFit: 'contain' }} />
+                    </div>
+                    {/* Información del producto */}
+                    <div className="card-body p-0 mt-3 text-center">
+                      <div className="product-title">{prod.nombre}</div>
+                      <div className="product-category small text-muted">{prod.categoria || ''}</div>
+                      <div className="product-price">${prod.precio}</div>
+                      <div className="small text-muted">
+                        {inStock ? `Stock: ${stock}` : 'Sin stock'}
+                      </div>
+                      {/* Botón de agregar al carrito con validación de stock */}
+                      <button
+                        className={`btn w-100 mt-2 ${inStock ? 'btn-add-cart' : 'btn-secondary'}`}
+                        onClick={() => {
+                          // Verificar stock antes de agregar
+                          if (!inStock) {
+                            alert('No hay stock disponible de este producto.');
+                            return;
+                          }
+                          
+                          const cart = JSON.parse(localStorage.getItem('frenesiCarrito') || '[]');
+                          const existing = cart.find((item: any) => String(item.id) === String(prod.id));
+                          
+                          if (existing) {
+                            if (existing.cantidad >= stock) {
+                              alert(`Solo hay ${stock} unidades disponibles.`);
+                              return;
+                            }
+                            existing.cantidad += 1;
+                          } else {
+                            cart.push({ id: prod.id, nombre: prod.nombre, precio: prod.precio, cantidad: 1 });
+                          }
+                          
+                          localStorage.setItem('frenesiCarrito', JSON.stringify(cart));
+                          window.dispatchEvent(new Event('storage'));
+                        }}
+                        disabled={!inStock}
+                      >
+                        {inStock ? 'Agregar al carrito' : 'Sin stock'}
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
             {/* Mensaje si no hay resultados */}
             {filtered.length === 0 && (
               <div className="col-12">

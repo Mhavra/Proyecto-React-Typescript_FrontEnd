@@ -1,9 +1,14 @@
 /**
  * PRODUCTO FORM - Formulario de productos
  * 
+ * Componente que maneja la creación y edición de productos.
+ * Incluye campos para nombre, categoría, precio, stock, imagen y descripción.
+ * Permite cargar imágenes y vista previa.
+ * El stock es obligatorio y no puede ser negativo.
+ * 
  * @component
- * @param props.producto - Producto a editar (opcional)
- * @param props.onSave - Función al guardar
+ * @param props.producto - Producto a editar (opcional, si no hay, es creación)
+ * @param props.onSave - Función al guardar (recibe los datos del producto)
  * @param props.onCancel - Función al cancelar
  */
 
@@ -42,7 +47,7 @@ export default function ProductoForm({ producto, onSave, onCancel }: ProductoFor
         precio: producto.precio,
         imagen: producto.imagen,
         descripcion: producto.descripcion || '',
-        stock: producto.stock || 0,
+        stock: producto.stock !== undefined ? producto.stock : 0,
       });
       setImagePreview(producto.imagen);
     }
@@ -77,7 +82,7 @@ export default function ProductoForm({ producto, onSave, onCancel }: ProductoFor
       <div className="row">
         {/* Campo: Nombre */}
         <div className="col-12 col-md-6 mb-3">
-          <label className="form-label fw-semibold">Nombre</label>
+          <label className="form-label fw-semibold">Nombre <span className="text-danger">*</span></label>
           <input
             type="text"
             className="form-control"
@@ -87,10 +92,10 @@ export default function ProductoForm({ producto, onSave, onCancel }: ProductoFor
             required
           />
         </div>
-
+        
         {/* Campo: Categoría */}
         <div className="col-12 col-md-6 mb-3">
-          <label className="form-label fw-semibold">Categoría</label>
+          <label className="form-label fw-semibold">Categoría <span className="text-danger">*</span></label>
           <input
             type="text"
             className="form-control"
@@ -100,10 +105,10 @@ export default function ProductoForm({ producto, onSave, onCancel }: ProductoFor
             required
           />
         </div>
-
+        
         {/* Campo: Precio */}
         <div className="col-12 col-md-6 mb-3">
-          <label className="form-label fw-semibold">Precio (CLP)</label>
+          <label className="form-label fw-semibold">Precio (CLP) <span className="text-danger">*</span></label>
           <input
             type="number"
             className="form-control"
@@ -114,10 +119,10 @@ export default function ProductoForm({ producto, onSave, onCancel }: ProductoFor
             min="0"
           />
         </div>
-
-        {/* Campo: Stock */}
+        
+        {/* Campo: Stock - OBLIGATORIO */}
         <div className="col-12 col-md-6 mb-3">
-          <label className="form-label fw-semibold">Stock</label>
+          <label className="form-label fw-semibold">Stock <span className="text-danger">*</span></label>
           <input
             type="number"
             className="form-control"
@@ -127,8 +132,9 @@ export default function ProductoForm({ producto, onSave, onCancel }: ProductoFor
             required
             min="0"
           />
+          <small className="text-muted">Ingresa la cantidad disponible. 0 = sin stock.</small>
         </div>
-
+        
         {/* Campo: Imagen (File input) */}
         <div className="col-12 mb-3">
           <label className="form-label fw-semibold">Imagen del producto</label>
@@ -138,7 +144,6 @@ export default function ProductoForm({ producto, onSave, onCancel }: ProductoFor
             accept="image/*"
             onChange={handleImageChange}
           />
-
           {/* Vista previa de la imagen */}
           {imagePreview && (
             <div className="mt-2">
@@ -146,7 +151,7 @@ export default function ProductoForm({ producto, onSave, onCancel }: ProductoFor
             </div>
           )}
         </div>
-      
+        
         {/* Campo: Descripción */}
         <div className="col-12 mb-3">
           <label className="form-label fw-semibold">Descripción</label>
@@ -159,7 +164,7 @@ export default function ProductoForm({ producto, onSave, onCancel }: ProductoFor
           />
         </div>
       </div>
-
+      
       {/* Botones de acción */}
       <div className="d-flex gap-2">
         <button type="submit" className="btn" style={{ backgroundColor: '#6f42c1', color: 'white' }}>
