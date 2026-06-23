@@ -1,6 +1,6 @@
 # Proyecto-React-Typescript_FrontEnd
 
-## *Contexto para la tercera etapa (Intranet React + TypeScript)*
+## Contexto para la tercera etapa (Intranet React + TypeScript)
 Frenesí Papelería necesita una herramienta de gestión interna que permita a la dueña administrar el inventario, procesar pedidos, atender consultas y gestionar usuarios de forma centralizada y ágil. Actualmente, estas tareas se realizan manualmente (revisión de mensajes, actualización de stock en archivos externos), lo que genera demoras, errores y sobrecarga de trabajo. La intranet propuesta automatizará estos procesos y dará trazabilidad a las operaciones del negocio, conectando directamente con los datos generados por el sitio web público (carrito de compras y formulario de contacto).
 
 Necesidad digital identificada
@@ -19,7 +19,6 @@ La dueña necesita una plataforma que le permita:
 
 -Todo esto en una interfaz protegida por login, con persistencia de datos y navegación fluida.
 
-
 Cambios y mejoras respecto a la segunda etapa
 ----
 -Migración a React + TypeScript: Se reemplaza el HTML/CSS/JS estático por una SPA con componentes modulares, tipado fuerte y estado controlado.
@@ -36,23 +35,38 @@ Cambios y mejoras respecto a la segunda etapa
 
 -Diseño consistente y modo oscuro: Se conserva la identidad visual de Frenesí (colores, iconos) y el modo oscuro/claro implementado en la ES2, ahora gestionado desde React con localStorage.
 
-Inicializar el proyecto
-----------
-En CMD, la carpeta del proyecto raiz:
--npm install / yarn install
--npm run dev / yarn dev
-
--npm install @popperjs/core 
 ## Tecnologías Utilizadas
-----------------
+
 - **React 18** con **TypeScript**: Para construir una interfaz de usuario robusta y tipada.
 - **React Router DOM**: Para la navegación sin recarga de página (SPA).
 - **Bootstrap 5**: Para los estilos y componentes visuales.
 - **localStorage**: Para la persistencia de datos en el navegador.
 - **Context API**: Para la gestión del estado de autenticación.
 
+## Listado de secciones que tendrá el sitio web.
+
+-Inicio/Tienda
+
+-Nosotros
+
+-Novedades
+
+-Carrito
+
+-Correo ayuda
+
+-Panel de administrador
+
+## Integrantes del grupo.
+
+-Nayaret Larrondo
+
+-Fram Salinas
+
+-Nilson Oyarce
+
 ## Instalación y Ejecución Local
---------------------
+
 Para ejecutar el proyecto en tu máquina local, sigue estos pasos:
 
 ```bash
@@ -71,24 +85,3 @@ npm install @popperjs/core
 # 5. Ejecutar el servidor de desarrollo
 npm run dev
 
-## Listado de secciones que tendrá el sitio web.
---------------------------
--Inicio
-
--Nosotros
-
--Novedades
-
--Carrito
-
--Correo ayuda
-
--Panel de administrador
-
-## Integrantes del grupo.
-------------------------------------
--Nayaret Larrondo
-
--Fram Salinas
-
--Nilson Oyarce
