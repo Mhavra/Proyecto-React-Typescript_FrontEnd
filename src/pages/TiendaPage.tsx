@@ -29,6 +29,7 @@ export default function TiendaPage() {
       cart.push({ id: prod.id, nombre: prod.nombre, precio: prod.precio, cantidad: 1 });
     }
     localStorage.setItem('frenesiCarrito', JSON.stringify(cart));
+    // Disparar evento para actualizar el contador en el header
     window.dispatchEvent(new Event('storage'));
   };
 

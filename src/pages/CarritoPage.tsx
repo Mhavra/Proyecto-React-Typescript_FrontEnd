@@ -141,6 +141,7 @@ export default function CarritoPage() {
             <p className="hero-subtitle">Revisa tus productos y completa tu pedido</p>
           </div>
 
+          {/* Tabla de productos */}
           <div className="table-responsive mb-4">
             <table className="table align-middle">
               <thead>

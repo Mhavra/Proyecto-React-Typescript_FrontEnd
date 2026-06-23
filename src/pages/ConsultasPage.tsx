@@ -14,12 +14,15 @@ import SearchBar from '@/components/common/SearchBar';
 import ConsultaList from '@/components/consultas/ConsultaList';
 
 export default function ConsultasPage() {
+  // Estado de consultas con persistencia en localStorage
   const [consultas, setConsultas] = useLocalStorage<Consulta[]>(STORAGE_KEYS.CONSULTAS, []);
+  // Estado para el filtro por estado
   const [filtroEstado, setFiltroEstado] = useState<string>('todas');
+  // Estado para la búsqueda
   const [search, setSearch] = useState('');
 
   /**
-   * Filtra consultas por estado y cliente
+   * Filtra consultas por estado seleccionado y cliente
    */
         const consultasFiltradas = consultas.filter(c => {
     const matchesEstado = filtroEstado === 'todas' ? true : c.estado === filtroEstado;
@@ -53,7 +56,7 @@ export default function ConsultasPage() {
     <div>
       <h4 className="fw-bold mb-4">Consultas de Clientes</h4>
 
-      {/* Filtros */}
+      {/* Filtros por estado */}
       <div className="d-flex flex-wrap gap-2 mb-3">
         <button
           onClick={() => setFiltroEstado('todas')}

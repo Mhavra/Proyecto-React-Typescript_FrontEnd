@@ -19,6 +19,7 @@ interface ProductoListProps {
 }
 
 export default function ProductoList({ productos, onEdit, onDelete }: ProductoListProps) {
+  // Si no hay productos, mostrar mensaje
   if (productos.length === 0) {
     return (
       <div className="text-center text-muted py-5">
@@ -47,6 +48,7 @@ export default function ProductoList({ productos, onEdit, onDelete }: ProductoLi
                 <tr key={producto.id}>
                   <td>
                     <div className="d-flex align-items-center">
+                      {/* Imagen del producto (con fallback) */}
                       <img
                         src={producto.imagen || '/placeholder.png'}
                         alt={producto.nombre}
@@ -65,6 +67,7 @@ export default function ProductoList({ productos, onEdit, onDelete }: ProductoLi
                   <td>${producto.precio.toLocaleString()}</td>
                   <td>{producto.stock}</td>
                   <td className="text-end">
+                    {/* Botón de editar */}
                     <button
                       onClick={() => onEdit(producto)}
                       className="btn btn-sm btn-outline-warning me-1"
@@ -72,6 +75,7 @@ export default function ProductoList({ productos, onEdit, onDelete }: ProductoLi
                     >
                       <i className="bi bi-pencil"></i>
                     </button>
+                    {/* Botón de eliminar */}
                     <button
                       onClick={() => onDelete(producto.id)}
                       className="btn btn-sm btn-outline-danger"

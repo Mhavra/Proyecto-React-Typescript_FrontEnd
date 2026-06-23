@@ -19,6 +19,7 @@ interface ProductoFormProps {
 }
 
 export default function ProductoForm({ producto, onSave, onCancel }: ProductoFormProps) {
+  // Estado del formulario
   const [formData, setFormData] = useState<Omit<Producto, 'id'>>({
     nombre: '',
     categoria: '',
@@ -27,8 +28,12 @@ export default function ProductoForm({ producto, onSave, onCancel }: ProductoFor
     descripcion: '',
     stock: 0,
   });
+  // Estado para vista previa de la imagen
   const [imagePreview, setImagePreview] = useState<string>('');
 
+  /**
+   * Efecto para cargar los datos del producto cuando se edita
+   */
   useEffect(() => {
     if (producto) {
       setFormData({
@@ -43,6 +48,10 @@ export default function ProductoForm({ producto, onSave, onCancel }: ProductoFor
     }
   }, [producto]);
 
+  /**
+   * Maneja la carga de imágenes
+   * Convierte la imagen a base64 para almacenamiento en localStorage
+   */
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -55,6 +64,9 @@ export default function ProductoForm({ producto, onSave, onCancel }: ProductoFor
     reader.readAsDataURL(file);
   };
 
+  /**
+   * Maneja el envío del formulario
+   */
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     onSave(formData);
@@ -63,6 +75,7 @@ export default function ProductoForm({ producto, onSave, onCancel }: ProductoFor
   return (
     <form onSubmit={handleSubmit}>
       <div className="row">
+        {/* Campo: Nombre */}
         <div className="col-12 col-md-6 mb-3">
           <label className="form-label fw-semibold">Nombre</label>
           <input
@@ -74,6 +87,8 @@ export default function ProductoForm({ producto, onSave, onCancel }: ProductoFor
             required
           />
         </div>
+
+        {/* Campo: Categoría */}
         <div className="col-12 col-md-6 mb-3">
           <label className="form-label fw-semibold">Categoría</label>
           <input
@@ -85,6 +100,8 @@ export default function ProductoForm({ producto, onSave, onCancel }: ProductoFor
             required
           />
         </div>
+
+        {/* Campo: Precio */}
         <div className="col-12 col-md-6 mb-3">
           <label className="form-label fw-semibold">Precio (CLP)</label>
           <input
@@ -97,6 +114,8 @@ export default function ProductoForm({ producto, onSave, onCancel }: ProductoFor
             min="0"
           />
         </div>
+
+        {/* Campo: Stock */}
         <div className="col-12 col-md-6 mb-3">
           <label className="form-label fw-semibold">Stock</label>
           <input
@@ -109,6 +128,8 @@ export default function ProductoForm({ producto, onSave, onCancel }: ProductoFor
             min="0"
           />
         </div>
+
+        {/* Campo: Imagen (File input) */}
         <div className="col-12 mb-3">
           <label className="form-label fw-semibold">Imagen del producto</label>
           <input
@@ -117,12 +138,16 @@ export default function ProductoForm({ producto, onSave, onCancel }: ProductoFor
             accept="image/*"
             onChange={handleImageChange}
           />
+
+          {/* Vista previa de la imagen */}
           {imagePreview && (
             <div className="mt-2">
               <img src={imagePreview} alt="Vista previa" style={{ maxWidth: '150px', maxHeight: '150px' }} />
             </div>
           )}
         </div>
+      
+        {/* Campo: Descripción */}
         <div className="col-12 mb-3">
           <label className="form-label fw-semibold">Descripción</label>
           <textarea
@@ -134,6 +159,8 @@ export default function ProductoForm({ producto, onSave, onCancel }: ProductoFor
           />
         </div>
       </div>
+
+      {/* Botones de acción */}
       <div className="d-flex gap-2">
         <button type="submit" className="btn" style={{ backgroundColor: '#6f42c1', color: 'white' }}>
           <i className="bi bi-save me-1"></i> Guardar

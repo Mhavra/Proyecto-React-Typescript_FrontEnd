@@ -2,11 +2,23 @@
 
 import { Link } from 'react-router-dom';
 
+/**
+ * FOOTER - Pie de página de la tienda
+ * 
+ * Muestra:
+ * - Logo de la empresa
+ * - Enlaces a redes sociales (Facebook, Instagram)
+ * - Información de contacto
+ * - Enlaces de ayuda y políticas
+ * - Copyright
+ */
+
 export default function Footer() {
   return (
     <footer className="text-light py-2 mt-auto">
       <div className="container">
         <div className="row">
+          {/* Columna izquierda: Logo y redes sociales */}
           <div className="col-md-2 text-left">
             <Link to="/" title="Ir al inicio">
               <img src="/assets/img/Foto_Empresa.webp" alt="Logo Empresa" className="logo-empresa" />
@@ -26,6 +38,7 @@ export default function Footer() {
             </ul>
           </div>
 
+          {/* Columna central izquierda: Más información */}
           <div className="col-md-3 text-center">
             <p className="footer-title">Más Información</p>
             <Link to="/acerca-de-nosotros" className="footer-link">Acerca de nosotros</Link>
@@ -33,6 +46,7 @@ export default function Footer() {
             <Link to="#" className="footer-link">Trabaja con nosotros</Link>
           </div>
 
+          {/* Columna central derecha: Contacto */}
           <div className="col-md-3 text-center footer-contacto">
             <p className="footer-title">Contacto</p>
             <p>Dirección: Santiago, Chile</p>
@@ -41,6 +55,7 @@ export default function Footer() {
             <p>Horario de atención: 10:00 a 19:00.</p>
           </div>
 
+          {/* Columna derecha: Ayuda */}
           <div className="col-md-3 text-right">
             <p className="footer-title">Ayuda</p>
             <Link to="/servicio-cliente" className="footer-link">Servicio al Cliente</Link>
@@ -52,6 +67,8 @@ export default function Footer() {
             <Link to="#" className="footer-link">Políticas de Privacidad</Link>
           </div>
         </div>
+
+        {/* Copyright */}
         <p className="text-center mt-3">© 2026 Frenesí Papelería, Todos los derechos reservados.</p>
       </div>
     </footer>
