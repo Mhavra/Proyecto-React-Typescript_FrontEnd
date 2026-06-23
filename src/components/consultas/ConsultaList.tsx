@@ -19,9 +19,16 @@ interface ConsultaListProps {
 }
 
 export default function ConsultaList({ consultas, onCambiarEstado, onDelete }: ConsultaListProps) {
+  // Estado para controlar qué consulta está siendo respondida
   const [respondiendoId, setRespondiendoId] = useState<number | null>(null);
+  // Estado para el texto de respuesta
   const [respuestaTexto, setRespuestaTexto] = useState('');
 
+  /**
+   * Maneja el proceso de responder una consulta
+   * - Si se hace clic en "Responder" por primera vez, muestra el textarea
+   * - Si ya está abierto, envía la respuesta
+   */
   const handleResponder = (id: number) => {
     if (respondiendoId === id) {
       // Enviar respuesta
@@ -33,12 +40,14 @@ export default function ConsultaList({ consultas, onCambiarEstado, onDelete }: C
         alert('Escribe una respuesta antes de enviar.');
       }
     } else {
+      // Abrir el área de respuesta
       setRespondiendoId(id);
       const consulta = consultas.find(c => c.id === id);
       setRespuestaTexto(consulta?.respuesta || '');
     }
   };
 
+  // Si no hay consultas, mostrar mensaje
   if (consultas.length === 0) {
     return (
       <div className="text-center text-muted py-5">
@@ -48,6 +57,9 @@ export default function ConsultaList({ consultas, onCambiarEstado, onDelete }: C
     );
   }
 
+  /**
+   * Obtiene la clase CSS para el badge según el estado
+   */
   const getEstadoColor = (estado: string) => {
     const colors: Record<string, string> = {
       no_leida: 'bg-danger text-white',
@@ -57,6 +69,9 @@ export default function ConsultaList({ consultas, onCambiarEstado, onDelete }: C
     return colors[estado] || 'bg-secondary text-white';
   };
 
+  /**
+   * Obtiene el texto legible para el estado
+   */
   const getEstadoTexto = (estado: string) => {
     const textos: Record<string, string> = {
       no_leida: 'No leída',
@@ -102,6 +117,7 @@ export default function ConsultaList({ consultas, onCambiarEstado, onDelete }: C
                     </span>
                   </td>
                   <td className="text-end">
+                    {/* Si está en modo respuesta, mostrar textarea y botones */}
                     {respondiendoId === consulta.id ? (
                       <div className="d-flex flex-column gap-1">
                         <textarea
@@ -130,6 +146,7 @@ export default function ConsultaList({ consultas, onCambiarEstado, onDelete }: C
                         </div>
                       </div>
                     ) : (
+                      // Botones de acción según el estado
                       <>
                         {consulta.estado === 'no_leida' && (
                           <button

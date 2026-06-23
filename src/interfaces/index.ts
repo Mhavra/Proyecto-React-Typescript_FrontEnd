@@ -1,5 +1,7 @@
 // src/interfaces/index.ts
-
+/**
+ * USUARIO - Representa un usuario del sistema
+ */
 export interface Usuario {
   id: number;
   nombre: string;
@@ -8,6 +10,9 @@ export interface Usuario {
   rol: 'admin' | 'cliente';  
 }
 
+/**
+ * PRODUCTO - Representa un producto de la tienda
+ */
 export interface Producto {
   id: number;  
   nombre: string;
@@ -18,6 +23,9 @@ export interface Producto {
   stock?: number;
 }
 
+/**
+ * PEDIDO - Representa un pedido realizado por un cliente
+ */
 export interface Pedido {
   id: number;
   cliente: string;
@@ -30,6 +38,9 @@ export interface Pedido {
   estado: 'pendiente' | 'enviado' | 'entregado';
 }
 
+/**
+ * CONSULTA - Representa una consulta de servicio al cliente
+ */
 export interface Consulta {
   id: number;
   nombre: string;
@@ -42,6 +53,9 @@ export interface Consulta {
   respuesta?: string;
 }
 
+/**
+ * AUTH CONTEXT TYPE - Tipo del contexto de autenticación
+ */
 export interface AuthContextType {
   user: Usuario | null;
   login: (email: string, password: string) => Promise<boolean>;

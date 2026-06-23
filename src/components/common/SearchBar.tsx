@@ -1,5 +1,8 @@
 /**
  * SEARCH BAR - Componente de búsqueda reutilizable
+ * 
+ * Proporciona una barra de búsqueda con ícono de lupa.
+ * Se puede usar en cualquier página que necesite filtrado.
  */
 
 'use client';
@@ -20,9 +23,11 @@ export default function SearchBar({
   return (
     <div className={`mb-3 ${className}`}>
       <div className="input-group">
+        {/* Ícono de búsqueda */}
         <span className="input-group-text bg-white border-end-0">
           <i className="bi bi-search text-muted"></i>
         </span>
+        {/* Input de texto */}
         <input
           type="text"
           className="form-control border-start-0"

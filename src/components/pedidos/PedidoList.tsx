@@ -19,6 +19,7 @@ export default function PedidoList({ pedidos, onCambiarEstado, onDelete }: Pedid
   // Si pedidos es undefined o null, inicializar como array vacío (por seguridad)
   const safePedidos = pedidos || [];
 
+  // Si no hay pedidos, mostrar mensaje
   if (safePedidos.length === 0) {
     return (
       <div className="text-center text-muted py-5">
@@ -28,6 +29,9 @@ export default function PedidoList({ pedidos, onCambiarEstado, onDelete }: Pedid
     );
   }
 
+  /**
+   * Obtiene la clase CSS para el badge según el estado
+   */
   const getEstadoColor = (estado: string) => {
     const colors: Record<string, string> = {
       pendiente: 'bg-warning text-dark',
@@ -62,6 +66,7 @@ export default function PedidoList({ pedidos, onCambiarEstado, onDelete }: Pedid
                     <br />
                     <small className="text-muted">{pedido.productos.length} productos</small>
                   </td>
+                  {/* Mostrar email, dirección y teléfono, o '-' si no existen */}
                   <td>{pedido.email || '-'}</td>
                   <td>{pedido.direccion || '-'}</td>
                   <td>{pedido.telefono || '-'}</td>
@@ -73,6 +78,7 @@ export default function PedidoList({ pedidos, onCambiarEstado, onDelete }: Pedid
                     </span>
                   </td>
                   <td className="text-end">
+                    {/* Botón para marcar como enviado (solo si está pendiente) */}
                     {pedido.estado === 'pendiente' && (
                       <button
                         onClick={() => onCambiarEstado(pedido.id, 'enviado')}
@@ -82,6 +88,7 @@ export default function PedidoList({ pedidos, onCambiarEstado, onDelete }: Pedid
                         <i className="bi bi-truck"></i>
                       </button>
                     )}
+                    {/* Botón para marcar como entregado (solo si está enviado) */}
                     {pedido.estado === 'enviado' && (
                       <button
                         onClick={() => onCambiarEstado(pedido.id, 'entregado')}
@@ -91,6 +98,7 @@ export default function PedidoList({ pedidos, onCambiarEstado, onDelete }: Pedid
                         <i className="bi bi-check2"></i>
                       </button>
                     )}
+                    {/* Botón para eliminar pedido */}
                     <button
                       onClick={() => onDelete(pedido.id)}
                       className="btn btn-sm btn-outline-danger"

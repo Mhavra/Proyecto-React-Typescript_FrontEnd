@@ -45,7 +45,7 @@ function AppRoutes() {
 
   return (
     <Routes>
-      {/* Rutas públicas */}
+      {/* Rutas públicas (accesibles sin autenticación) */}
       <Route path="/" element={<TiendaPage />} />
       <Route path="/novedades" element={<NovedadesPage />} />
       <Route path="/servicio-cliente" element={<ServicioClientePage />} />
@@ -114,6 +114,7 @@ function AppRoutes() {
           </PrivateRoute>
         }
       />
+      {/* Ruta de fallback: redirige a la tienda */}
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );
