@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { storage, STORAGE_KEYS } from '@/services/localStorageService';
-import { Pedido } from '@/interfaces';
+import { Pedido, Producto } from '@/interfaces';
 import Header from '@/components/common/Header';
 import Footer from '@/components/common/Footer';
 
@@ -19,12 +19,11 @@ interface CartItem {
  * 
  * Permite:
  * - Ver productos agregados al carrito
- * - Modificar cantidades
+ * - Modificar cantidades (con validación de stock)
  * - Eliminar productos
- * - Realizar pedidos (logueado o no)
- * - SIEMPRE se solicita dirección y teléfono (obligatorios)
- * - Si está logueado: se precargan nombre y email, pero dirección y teléfono son obligatorios
- * - Si no está logueado: formulario completo con todas las validaciones
+ * - Realizar pedidos (logueado o no) con verificación de stock
+ * - Si está logueado: se precargan nombre y email
+ * - Si no está logueado: formulario completo con validaciones
  * 
  * @page /carrito
  */
@@ -70,17 +69,39 @@ export default function CarritoPage() {
   };
 
   /**
+   * Obtiene el stock de un producto de forma segura
+   */
+  const getProductStock = (id: string | number): number => {
+    const productos = storage.get<Producto>(STORAGE_KEYS.PRODUCTOS);
+    const producto = productos.find(p => String(p.id) === String(id));
+    return producto?.stock !== undefined ? producto.stock : 0;
+  };
+
+  /**
    * Actualiza la cantidad de un producto en el carrito
+   * Verifica que no supere el stock disponible
    * @param id - ID del producto
    * @param newQty - Nueva cantidad (mínimo 1)
    */
   const updateQuantity = (id: string | number, newQty: number) => {
     if (newQty < 1) return;
+    
+    // Obtener el stock del producto
+    const stockDisponible = getProductStock(id);
+    
+    // Verificar que no supere el stock disponible
+    if (newQty > stockDisponible) {
+      alert(`Solo hay ${stockDisponible} unidades disponibles.`);
+      return;
+    }
+    
     const updated = cart.map(item =>
       String(item.id) === String(id) ? { ...item, cantidad: newQty } : item
     );
+    
     localStorage.setItem('frenesiCarrito', JSON.stringify(updated));
     setCart(updated);
+    
     const sum = updated.reduce((acc, item) => acc + item.precio * item.cantidad, 0);
     setTotal(sum);
     window.dispatchEvent(new Event('storage'));
@@ -128,19 +149,24 @@ export default function CarritoPage() {
   const validateEmail = (value: string): string => {
     if (!value.trim()) return 'El correo electrónico es obligatorio.';
     
-    // Expresión regular mejorada para email
-    // - Parte local: letras, números, puntos, guiones bajos y guiones
-    // - @ seguido de letras (sin números) y puntos
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z]+\.[a-zA-Z]{2,}$/;
+    // Expresión regular para email válido (sin +, %, ni otros símbolos especiales)
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z]+\.[a-zA-Z]{2,}$/;
     
     if (!emailRegex.test(value.trim())) {
-      return 'Ingresa un correo válido (ejemplo: usuario@dominio.com).';
+      return 'Ingresa un correo válido (ejemplo: usuario@gmail.com).';
     }
     
     // Verificar que después del @ solo haya letras (sin números)
     const parts = value.trim().split('@');
     if (parts.length === 2) {
+      const localPart = parts[0];
       const domain = parts[1];
+      
+      // El nombre del correo NO puede ser solo números
+      if (/^\d+$/.test(localPart)) {
+        return 'El nombre del correo no puede ser solo números.';
+      }
+      
       // El dominio no debe contener números
       if (/\d/.test(domain)) {
         return 'El dominio del correo no puede contener números después del @.';
@@ -294,6 +320,8 @@ export default function CarritoPage() {
 
   /**
    * Función común para crear un pedido
+   * - Verifica que todos los productos tengan stock suficiente
+   * - Descuenta el stock de cada producto
    * - Construye el objeto pedido con los datos del cliente
    * - Guarda en localStorage (frenesi_pedidos)
    * - Vacía el carrito
@@ -305,6 +333,23 @@ export default function CarritoPage() {
       return;
     }
 
+    // Verificar stock de todos los productos en el carrito
+    const productos = storage.get<Producto>(STORAGE_KEYS.PRODUCTOS);
+    
+    for (const item of cart) {
+      const producto = productos.find(p => String(p.id) === String(item.id));
+      if (!producto) {
+        setMessage(`El producto "${item.nombre}" ya no está disponible.`);
+        return;
+      }
+      const stockDisponible = producto.stock !== undefined ? producto.stock : 0;
+      if (stockDisponible < item.cantidad) {
+        setMessage(`No hay suficiente stock de "${item.nombre}". Disponible: ${stockDisponible}`);
+        return;
+      }
+    }
+
+    // Construir el objeto pedido
     const pedido: Omit<Pedido, 'id'> = {
       cliente: datos.cliente,
       email: datos.email || '',
@@ -320,9 +365,21 @@ export default function CarritoPage() {
       estado: 'pendiente'
     };
 
-    console.log('📦 Pedido a guardar:', pedido); // Para depuración
+    console.log('📦 Pedido a guardar:', pedido);
 
-    // Guardar en localStorage
+    // Descontar stock de cada producto
+    for (const item of cart) {
+      const productoIndex = productos.findIndex(p => String(p.id) === String(item.id));
+      if (productoIndex !== -1) {
+        const stockActual = productos[productoIndex].stock !== undefined ? productos[productoIndex].stock : 0;
+        const nuevoStock = stockActual - item.cantidad;
+        storage.updateItem<Producto>(STORAGE_KEYS.PRODUCTOS, productos[productoIndex].id, {
+          stock: nuevoStock
+        });
+      }
+    }
+
+    // Guardar el pedido en localStorage
     storage.addItem<Pedido>(STORAGE_KEYS.PEDIDOS, pedido);
 
     // Vaciar carrito
@@ -393,27 +450,36 @@ export default function CarritoPage() {
                     <td colSpan={4} className="text-center py-4">Tu carrito está vacío.</td>
                   </tr>
                 ) : (
-                  cart.map(item => (
-                    <tr key={String(item.id)}>
-                      <td>{item.nombre}</td>
-                      <td>${item.precio}</td>
-                      <td>
-                        <input
-                          type="number"
-                          min="1"
-                          value={item.cantidad}
-                          className="form-control form-control-sm"
-                          style={{ width: '80px' }}
-                          onChange={(e) => updateQuantity(item.id, parseInt(e.target.value) || 1)}
-                        />
-                      </td>
-                      <td>
-                        <button className="btn btn-sm btn-outline-danger" onClick={() => removeItem(item.id)}>
-                          Eliminar
-                        </button>
-                      </td>
-                    </tr>
-                  ))
+                  cart.map(item => {
+                    // Obtener el stock del producto para mostrar
+                    const stockDisponible = getProductStock(item.id);
+                    
+                    return (
+                      <tr key={String(item.id)}>
+                        <td>{item.nombre}</td>
+                        <td>${item.precio}</td>
+                        <td>
+                          <input
+                            type="number"
+                            min="1"
+                            max={stockDisponible > 0 ? stockDisponible : 1}
+                            value={item.cantidad}
+                            className="form-control form-control-sm"
+                            style={{ width: '80px' }}
+                            onChange={(e) => updateQuantity(item.id, parseInt(e.target.value) || 1)}
+                          />
+                          <small className="text-muted d-block">
+                            Stock disponible: {stockDisponible}
+                          </small>
+                        </td>
+                        <td>
+                          <button className="btn btn-sm btn-outline-danger" onClick={() => removeItem(item.id)}>
+                            Eliminar
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
@@ -452,7 +518,7 @@ export default function CarritoPage() {
                     value={name}
                     onChange={(e) => handleNameChange(e.target.value)}
                     maxLength={80}
-                    disabled={isAuthenticated && !!user} // Deshabilitar si está logueado
+                    disabled={isAuthenticated && !!user}
                   />
                   {errors.name && <div className="form-error">{errors.name}</div>}
                   <small className="text-muted">Solo letras y espacios. Mínimo 3 caracteres.</small>
@@ -467,10 +533,10 @@ export default function CarritoPage() {
                     id="checkoutEmail"
                     type="email"
                     className={`form-control ${errors.email ? 'is-invalid' : ''}`}
-                    placeholder="Ej: usuario@dominio.com"
+                    placeholder="Ej: usuario@gmail.com"
                     value={email}
                     onChange={(e) => handleEmailChange(e.target.value)}
-                    disabled={isAuthenticated && !!user} // Deshabilitar si está logueado
+                    disabled={isAuthenticated && !!user}
                   />
                   {errors.email && <div className="form-error">{errors.email}</div>}
                   <small className="text-muted">Formato: usuario@dominio.com (sin números en el dominio).</small>
