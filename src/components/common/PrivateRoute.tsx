@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
+import { useEffect } from 'react'; //useEffect para redirigir si no está autenticado o no tiene el rol 
+import { useNavigate } from 'react-router-dom'; //useNavigate para redirigir a login o tienda según le coloque
+import { useAuth } from '@/context/AuthContext'; //useAuth para obtener el estado de autenticación y el usuario actual
 
 interface PrivateRouteProps {
   children: React.ReactNode;
