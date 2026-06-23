@@ -115,6 +115,7 @@ export default function NovedadesPage() {
                   <div className="card-body p-0 mt-3 text-center">
                     <div className="product-title">{prod.nombre}</div>
                     <div className="product-category small text-muted">{prod.categoria || ''}</div>
+                    
                     <div className="product-price">${prod.precio}</div>
                     {/* Botón para agregar al carrito */}
                     <button

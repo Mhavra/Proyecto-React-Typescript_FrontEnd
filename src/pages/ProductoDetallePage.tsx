@@ -8,7 +8,7 @@ import ProductoDetalle from '@/components/productos/ProductoDetalle';
 
 export default function ProductoDetallePage() {
   // Obtener el ID de la URL
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams<{ id: string }>(); //useParams para obtener el id del producto de la url, que es dinamica
   const navigate = useNavigate();
   // Estado del producto
   const [producto, setProducto] = useState<Producto | null>(null);

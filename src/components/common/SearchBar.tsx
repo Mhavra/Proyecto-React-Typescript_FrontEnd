@@ -6,7 +6,7 @@
  */
 
 'use client';
-
+/*aqui se le da los props, que son los parámetros que recibe el componente */ 
 interface SearchBarProps {
   placeholder?: string;
   value: string;

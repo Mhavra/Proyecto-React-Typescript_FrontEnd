@@ -40,13 +40,14 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T)
   };
 
   useEffect(() => {
-    const handleStorageChange = () => {
+    const handleStorageChange = () => { //handleStorageChange se ejecuta cuando se detecta un cambio en localStorage desde otra pestaña
       const item = storage.getItem<T>(key);
       if (item.length > 0) {
         setStoredValue(item as T);
       }
     };
-
+    //window.addEventListener(...), lode abajo, escucha cambios en localStorage desde otras 
+    // pestañas y actualiza el estado en consecuencia
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
   }, [key]);

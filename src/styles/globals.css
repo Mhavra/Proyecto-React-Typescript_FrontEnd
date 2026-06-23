@@ -250,7 +250,7 @@ html, body {
 .hero-btn {
   display: inline-block;
   padding: 12px 30px;
-  border: 1px solid #333;
+  border: 1px solid #e042f5;
   text-decoration: none;
   color: #333;
 }
@@ -939,7 +939,7 @@ body.dark .alert-success {
 
 /* Botón "Ver más productos" - Modo claro */
 .btn-ver-mas {
-  background-color: transparent !important;
+  background-color: #faf6f6 !important;
   border: 2px solid #FF5FA2 !important;
   color: #333 !important;
   font-size: 1rem;
@@ -947,6 +947,7 @@ body.dark .alert-success {
   transition: all 0.3s ease;
   border-radius: 30px;
   font-weight: 500;
+  margin-top: 20px;
 }
 .btn-ver-mas:hover {
   background-color: #fff4e7 !important;
@@ -972,4 +973,23 @@ body.dark .btn-ver-mas {
 body.dark .btn-ver-mas:hover {
   background-color: #a855f7 !important;
   color: #fff !important;
+}
+
+/*cambio ultimo*/
+#hero-image {
+  position: absolute;
+  inset: 0;
+  background-size: auto;
+  background-position: center;
+  background-repeat: repeat;
+}
+
+/* Si quieres un dorado más brillante en modo oscuro */
+body.dark .hero-btn {
+  border-color: #f5c542;
+  color: #f5c542;
+}
+body.dark .hero-btn:hover {
+  background-color: #fcd15b;
+  color: #1a1a2e;
 }

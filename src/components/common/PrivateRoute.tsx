@@ -1,12 +1,11 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
-
+import { useEffect } from 'react'; //useEffect para decidir si al susuario lo debo redirigir a otro lado segun su estado
+import { useNavigate } from 'react-router-dom'; //useNavigate para redirigir a login o tienda según le cliquee
+import { useAuth } from '@/context/AuthContext'; //useAuth para obtener el estado de autenticación y el usuario actual
+//useeffect y usenavigate son 
 /**
  * PRIVATE ROUTE - Componente de protección de rutas
- * 
  * Solo permite el acceso a usuarios autenticados con los roles permitidos.
  * Redirige automáticamente a /login si no está autenticado,
  * o a / si no tiene el rol requerido.
@@ -17,11 +16,13 @@ import { useAuth } from '@/context/AuthContext';
  */
 
 interface PrivateRouteProps {
-  children: React.ReactNode;
+  children: React.ReactNode; 
+  //children es el escudo que protege las rutas, si pasa la verificación, renderiza los hijos y se ve pues
   allowedRoles?: string[]; // opcional, por defecto solo admin
 }
 
 export default function PrivateRoute({ children, allowedRoles = ['admin'] }: PrivateRouteProps) {
+  //esta funciona con useAuth para obtener el estado de autenticación y el usuario actual
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
@@ -29,7 +30,7 @@ export default function PrivateRoute({ children, allowedRoles = ['admin'] }: Pri
    * Efecto que verifica la autenticación y los roles
    * Redirige según corresponda
    */
-  useEffect(() => {
+  useEffect(() => { //useeffect sirve para rediriguir 
     // Si no está autenticado, redirigir al login
     if (!isAuthenticated) {
       navigate('/login');
