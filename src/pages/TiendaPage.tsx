@@ -54,6 +54,12 @@ export default function TiendaPage() {
                 </div>
                 <div className="card-body p-0 mt-3 text-center">
                   <div className="product-title">{prod.nombre}</div>
+                  {/* 🔹 Descripción agregada */}
+                  {prod.descripcion && (
+                    <div className="product-description small text-muted mt-1" style={{ fontSize: '0.8rem', padding: '0 8px' }}>
+                      {prod.descripcion.length > 60 ? prod.descripcion.substring(0, 60) + '...' : prod.descripcion}
+                    </div>
+                  )}
                   <div className="product-price">${prod.precio}</div>
                   <button
                     className="btn btn-add-cart w-100 mt-2"

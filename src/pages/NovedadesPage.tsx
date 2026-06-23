@@ -107,17 +107,19 @@ export default function NovedadesPage() {
             {filtered.map(prod => (
               <div key={prod.id} className="col-6 col-md-3 mb-4">
                 <div className="card border-0 h-100">
-                  {/* Imagen del producto */}
                   <div className="card-img-top">
                     <img src={prod.imagen} alt={prod.nombre} style={{ width: '100%', aspectRatio: '1/1', objectFit: 'contain' }} />
                   </div>
-                  {/* Información del producto */}
                   <div className="card-body p-0 mt-3 text-center">
                     <div className="product-title">{prod.nombre}</div>
                     <div className="product-category small text-muted">{prod.categoria || ''}</div>
-                    
+                    {/* 🔹 Descripción agregada */}
+                    {prod.descripcion && (
+                      <div className="product-description small text-muted mt-1" style={{ fontSize: '0.8rem', padding: '0 8px' }}>
+                        {prod.descripcion.length > 60 ? prod.descripcion.substring(0, 60) + '...' : prod.descripcion}
+                      </div>
+                    )}
                     <div className="product-price">${prod.precio}</div>
-                    {/* Botón para agregar al carrito */}
                     <button
                       className="btn btn-add-cart w-100 mt-2"
                       onClick={() => {
