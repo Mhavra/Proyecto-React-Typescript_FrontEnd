@@ -24,15 +24,19 @@ export default function ConsultasPage() {
   /**
    * Filtra consultas por estado seleccionado y cliente
    */
-        const consultasFiltradas = consultas.filter(c => {
+  const consultasFiltradas = consultas.filter(c => {
     const matchesEstado = filtroEstado === 'todas' ? true : c.estado === filtroEstado;
     const matchesSearch = c.nombre.toLowerCase().includes(search.toLowerCase()) ||
                           c.apellido.toLowerCase().includes(search.toLowerCase()) ||
                           c.email.toLowerCase().includes(search.toLowerCase());
     return matchesEstado && matchesSearch;
   });
-   /**
+
+  /**
    * Cambia el estado de una consulta
+   * @param id - ID de la consulta
+   * @param nuevoEstado - Nuevo estado (leida o respondida)
+   * @param respuesta - Texto de respuesta (opcional)
    */
   const handleCambiarEstado = (id: number, nuevoEstado: 'leida' | 'respondida', respuesta?: string) => {
     const updates: Partial<Consulta> = { estado: nuevoEstado };
@@ -42,8 +46,10 @@ export default function ConsultasPage() {
     storage.updateItem<Consulta>(STORAGE_KEYS.CONSULTAS, id, updates);
     setConsultas(storage.get<Consulta>(STORAGE_KEYS.CONSULTAS));
   };
- /**
-   * Elimina una consulta
+
+  /**
+   * Elimina una consulta (con confirmación)
+   * @param id - ID de la consulta a eliminar
    */
   const handleDelete = (id: number) => {
     if (confirm('¿Eliminar esta consulta?')) {

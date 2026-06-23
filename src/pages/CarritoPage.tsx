@@ -14,6 +14,20 @@ interface CartItem {
   cantidad: number;
 }
 
+/**
+ * CARRITO PAGE - Página del carrito de compras
+ * 
+ * Permite:
+ * - Ver productos agregados al carrito
+ * - Modificar cantidades
+ * - Eliminar productos
+ * - Realizar pedidos (logueado o no)
+ * - SIEMPRE se solicita dirección y teléfono (obligatorios)
+ * - Si está logueado: se precargan nombre y email, pero dirección y teléfono son obligatorios
+ * - Si no está logueado: formulario completo con todas las validaciones
+ * 
+ * @page /carrito
+ */
 export default function CarritoPage() {
   const { user, isAuthenticated } = useAuth();
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -25,12 +39,29 @@ export default function CarritoPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [message, setMessage] = useState('');
 
+  /**
+   * Efecto para cargar el carrito al montar el componente
+   * y escuchar cambios en localStorage (otras pestañas)
+   */
   useEffect(() => {
     loadCart();
     window.addEventListener('storage', loadCart);
     return () => window.removeEventListener('storage', loadCart);
   }, []);
 
+  /**
+   * Efecto para precargar datos del usuario si está logueado
+   */
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      setName(user.nombre);
+      setEmail(user.email);
+    }
+  }, [isAuthenticated, user]);
+
+  /**
+   * Carga el carrito desde localStorage y actualiza el total
+   */
   const loadCart = () => {
     const data = JSON.parse(localStorage.getItem('frenesiCarrito') || '[]');
     setCart(data);
@@ -38,6 +69,11 @@ export default function CarritoPage() {
     setTotal(sum);
   };
 
+  /**
+   * Actualiza la cantidad de un producto en el carrito
+   * @param id - ID del producto
+   * @param newQty - Nueva cantidad (mínimo 1)
+   */
   const updateQuantity = (id: string | number, newQty: number) => {
     if (newQty < 1) return;
     const updated = cart.map(item =>
@@ -50,6 +86,10 @@ export default function CarritoPage() {
     window.dispatchEvent(new Event('storage'));
   };
 
+  /**
+   * Elimina un producto del carrito
+   * @param id - ID del producto a eliminar
+   */
   const removeItem = (id: string | number) => {
     const filtered = cart.filter(item => String(item.id) !== String(id));
     localStorage.setItem('frenesiCarrito', JSON.stringify(filtered));
@@ -59,7 +99,206 @@ export default function CarritoPage() {
     window.dispatchEvent(new Event('storage'));
   };
 
-  // Función común para crear pedido
+  // ============================================================
+  // VALIDACIONES DEL FORMULARIO
+  // ============================================================
+
+  /**
+   * 1. VALIDACIÓN DE NOMBRE
+   * - Solo letras y espacios
+   * - Mínimo 3 caracteres
+   * - Máximo 80 caracteres
+   */
+  const validateName = (value: string): string => {
+    if (!value.trim()) return 'El nombre es obligatorio.';
+    if (value.trim().length < 3) return 'El nombre debe tener al menos 3 caracteres.';
+    if (value.trim().length > 80) return 'El nombre no puede tener más de 80 caracteres.';
+    // Solo letras (incluyendo acentos) y espacios
+    if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(value.trim())) {
+      return 'El nombre solo puede contener letras y espacios.';
+    }
+    return '';
+  };
+
+  /**
+   * 2. VALIDACIÓN DE EMAIL
+   * - Formato: palabra@palabra.palabra
+   * - No puede tener números después del @
+   */
+  const validateEmail = (value: string): string => {
+    if (!value.trim()) return 'El correo electrónico es obligatorio.';
+    
+    // Expresión regular mejorada para email
+    // - Parte local: letras, números, puntos, guiones bajos y guiones
+    // - @ seguido de letras (sin números) y puntos
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z]+\.[a-zA-Z]{2,}$/;
+    
+    if (!emailRegex.test(value.trim())) {
+      return 'Ingresa un correo válido (ejemplo: usuario@dominio.com).';
+    }
+    
+    // Verificar que después del @ solo haya letras (sin números)
+    const parts = value.trim().split('@');
+    if (parts.length === 2) {
+      const domain = parts[1];
+      // El dominio no debe contener números
+      if (/\d/.test(domain)) {
+        return 'El dominio del correo no puede contener números después del @.';
+      }
+    }
+    
+    return '';
+  };
+
+  /**
+   * 3. VALIDACIÓN DE DIRECCIÓN
+   * - Debe contener al menos una palabra y un número
+   * - No puede ser solo números
+   * - Mínimo 5 caracteres
+   */
+  const validateDireccion = (value: string): string => {
+    if (!value.trim()) return 'La dirección es obligatoria.';
+    if (value.trim().length < 5) return 'La dirección debe tener al menos 5 caracteres.';
+    
+    // Verificar que tenga al menos una letra (palabra)
+    if (!/[a-zA-Z]/.test(value.trim())) {
+      return 'La dirección debe contener al menos una palabra (letras).';
+    }
+    
+    // Verificar que tenga al menos un número
+    if (!/\d/.test(value.trim())) {
+      return 'La dirección debe contener al menos un número (ej: Calle 123).';
+    }
+    
+    return '';
+  };
+
+  /**
+   * 4. VALIDACIÓN DE TELÉFONO
+   * - Formato: +569 seguido de 8 dígitos
+   * - Total: 12 caracteres (+569 + 8 dígitos)
+   */
+  const validateTelefono = (value: string): string => {
+    if (!value.trim()) return 'El teléfono es obligatorio.';
+    
+    // Eliminar espacios y guiones para la validación
+    const cleanValue = value.trim().replace(/[\s-]/g, '');
+    
+    // Formato: +569XXXXXXXX (12 caracteres en total)
+    const phoneRegex = /^\+569\d{8}$/;
+    
+    if (!phoneRegex.test(cleanValue)) {
+      return 'Formato inválido. Debe ser +569 seguido de 8 dígitos (ej: +56912345678).';
+    }
+    
+    return '';
+  };
+
+  /**
+   * VALIDACIÓN COMPLETA DEL FORMULARIO
+   * Ejecuta todas las validaciones y retorna un objeto con los errores
+   */
+  const validateForm = (): Record<string, string> => {
+    const newErrors: Record<string, string> = {};
+    
+    const nameError = validateName(name);
+    if (nameError) newErrors.name = nameError;
+    
+    const emailError = validateEmail(email);
+    if (emailError) newErrors.email = emailError;
+    
+    const direccionError = validateDireccion(direccion);
+    if (direccionError) newErrors.direccion = direccionError;
+    
+    const telefonoError = validateTelefono(telefono);
+    if (telefonoError) newErrors.telefono = telefonoError;
+    
+    return newErrors;
+  };
+
+  // ============================================================
+  // MANEJADORES DE CAMBIOS CON VALIDACIÓN EN TIEMPO REAL
+  // ============================================================
+
+  /**
+   * Maneja el cambio del campo nombre con validación en tiempo real
+   */
+  const handleNameChange = (value: string) => {
+    setName(value);
+    const error = validateName(value);
+    if (error) {
+      setErrors(prev => ({ ...prev, name: error }));
+    } else {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.name;
+        return newErrors;
+      });
+    }
+  };
+
+  /**
+   * Maneja el cambio del campo email con validación en tiempo real
+   */
+  const handleEmailChange = (value: string) => {
+    setEmail(value);
+    const error = validateEmail(value);
+    if (error) {
+      setErrors(prev => ({ ...prev, email: error }));
+    } else {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.email;
+        return newErrors;
+      });
+    }
+  };
+
+  /**
+   * Maneja el cambio del campo dirección con validación en tiempo real
+   */
+  const handleDireccionChange = (value: string) => {
+    setDireccion(value);
+    const error = validateDireccion(value);
+    if (error) {
+      setErrors(prev => ({ ...prev, direccion: error }));
+    } else {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.direccion;
+        return newErrors;
+      });
+    }
+  };
+
+  /**
+   * Maneja el cambio del campo teléfono con validación en tiempo real
+   */
+  const handleTelefonoChange = (value: string) => {
+    setTelefono(value);
+    const error = validateTelefono(value);
+    if (error) {
+      setErrors(prev => ({ ...prev, telefono: error }));
+    } else {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.telefono;
+        return newErrors;
+      });
+    }
+  };
+
+  // ============================================================
+  // FUNCIONES DE CREACIÓN DE PEDIDO Y CHECKOUT
+  // ============================================================
+
+  /**
+   * Función común para crear un pedido
+   * - Construye el objeto pedido con los datos del cliente
+   * - Guarda en localStorage (frenesi_pedidos)
+   * - Vacía el carrito
+   * @param datos - Datos del cliente (nombre, email, dirección, teléfono)
+   */
   const crearPedido = (datos: { cliente: string; email?: string; direccion?: string; telefono?: string }) => {
     if (cart.length === 0) {
       setMessage('El carrito está vacío. Agrega productos antes de finalizar la compra.');
@@ -95,40 +334,36 @@ export default function CarritoPage() {
     setMessage('¡Gracias por tu pedido! Pronto nos pondremos en contacto.');
     setErrors({});
     // Limpiar formulario si está visible
-    setName('');
-    setEmail('');
+    setName(isAuthenticated && user ? user.nombre : '');
+    setEmail(isAuthenticated && user ? user.email : '');
     setDireccion('');
     setTelefono('');
   };
 
+  /**
+   * Maneja el envío del pedido
+   * - SIEMPRE valida todos los campos (nombre, email, dirección, teléfono)
+   * - Si está logueado: precarga nombre y email, pero dirección y teléfono son obligatorios
+   * - Si no está logueado: valida todos los campos del formulario
+   */
   const handleCheckout = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (isAuthenticated && user) {
-      // Usuario logueado: usar sus datos (dirección y teléfono pueden venir del perfil o dejarse vacíos)
-      crearPedido({
-        cliente: user.nombre,
-        email: user.email,
-        direccion: direccion.trim() || '', // si queremos permitir editarlos
-        telefono: telefono.trim() || ''
-      });
-    } else {
-      // Usuario no logueado: validar formulario
-      const errs: Record<string, string> = {};
-      if (!name.trim() || name.trim().length < 3) errs.name = 'Ingresa al menos 3 caracteres para el nombre.';
-      if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) errs.email = 'Ingresa un correo electrónico válido.';
-      if (Object.keys(errs).length > 0) {
-        setErrors(errs);
-        setMessage('');
-        return;
-      }
-      crearPedido({
-        cliente: name.trim(),
-        email: email.trim(),
-        direccion: direccion.trim(),
-        telefono: telefono.trim()
-      });
+    // Validar todos los campos siempre
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      setMessage('');
+      return;
     }
+
+    // Si pasa la validación, crear el pedido
+    crearPedido({
+      cliente: name.trim(),
+      email: email.trim(),
+      direccion: direccion.trim(),
+      telefono: telefono.trim()
+    });
   };
 
   return (
@@ -184,97 +419,101 @@ export default function CarritoPage() {
             </table>
           </div>
 
+          {/* Total */}
           <div className="d-flex justify-content-between align-items-center mb-4">
             <strong>Total:</strong>
             <div className="fs-5">${total}</div>
           </div>
 
+          {/* Checkout - SIEMPRE se muestra el formulario completo */}
           {cart.length > 0 && (
             <section className="checkout-form p-4 rounded-3 shadow-sm bg-white">
               <h2 className="mb-3">Finalizar compra</h2>
-
-              {isAuthenticated && user ? (
-                // Usuario logueado: mostramos sus datos y permitimos editar dirección y teléfono si se desea
-                <div>
-                  <p className="text-muted">
-                    Estás realizando el pedido como <strong>{user.nombre}</strong> ({user.email}).
-                  </p>
-                  <div className="mb-3">
-                    <label className="form-label">Dirección (opcional)</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Calle, número, comuna"
-                      value={direccion}
-                      onChange={(e) => setDireccion(e.target.value)}
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Teléfono (opcional)</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="+56 9 ..."
-                      value={telefono}
-                      onChange={(e) => setTelefono(e.target.value)}
-                    />
-                  </div>
-                  <button className="btn btn-add-cart w-100" onClick={handleCheckout}>
-                    Realizar pedido
-                  </button>
+              
+              {isAuthenticated && user && (
+                <div className="alert alert-info mb-3">
+                  <i className="bi bi-info-circle me-2"></i>
+                  Estás realizando el pedido como <strong>{user.nombre}</strong> ({user.email}).
+                  Completa los datos de dirección y teléfono para finalizar.
                 </div>
-              ) : (
-                // Usuario no logueado: formulario completo
-                <form onSubmit={handleCheckout}>
-                  <div className="mb-3">
-                    <label htmlFor="checkoutName" className="form-label">Nombre completo</label>
-                    <input
-                      id="checkoutName"
-                      type="text"
-                      className="form-control"
-                      placeholder="Tu nombre"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                    />
-                    {errors.name && <div className="form-error">{errors.name}</div>}
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="checkoutEmail" className="form-label">Correo electrónico</label>
-                    <input
-                      id="checkoutEmail"
-                      type="email"
-                      className="form-control"
-                      placeholder="correo@ejemplo.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
-                    {errors.email && <div className="form-error">{errors.email}</div>}
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="checkoutDireccion" className="form-label">Dirección</label>
-                    <input
-                      id="checkoutDireccion"
-                      type="text"
-                      className="form-control"
-                      placeholder="Calle, número, comuna"
-                      value={direccion}
-                      onChange={(e) => setDireccion(e.target.value)}
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="checkoutTelefono" className="form-label">Teléfono</label>
-                    <input
-                      id="checkoutTelefono"
-                      type="text"
-                      className="form-control"
-                      placeholder="+56 9 ..."
-                      value={telefono}
-                      onChange={(e) => setTelefono(e.target.value)}
-                    />
-                  </div>
-                  <button type="submit" className="btn btn-add-cart w-100">Enviar pedido</button>
-                </form>
               )}
+
+              <form onSubmit={handleCheckout} noValidate>
+                {/* Campo: Nombre */}
+                <div className="mb-3">
+                  <label htmlFor="checkoutName" className="form-label">
+                    Nombre completo <span className="text-danger">*</span>
+                  </label>
+                  <input
+                    id="checkoutName"
+                    type="text"
+                    className={`form-control ${errors.name ? 'is-invalid' : ''}`}
+                    placeholder="Ej: Juan Pérez"
+                    value={name}
+                    onChange={(e) => handleNameChange(e.target.value)}
+                    maxLength={80}
+                    disabled={isAuthenticated && !!user} // Deshabilitar si está logueado
+                  />
+                  {errors.name && <div className="form-error">{errors.name}</div>}
+                  <small className="text-muted">Solo letras y espacios. Mínimo 3 caracteres.</small>
+                </div>
+
+                {/* Campo: Email */}
+                <div className="mb-3">
+                  <label htmlFor="checkoutEmail" className="form-label">
+                    Correo electrónico <span className="text-danger">*</span>
+                  </label>
+                  <input
+                    id="checkoutEmail"
+                    type="email"
+                    className={`form-control ${errors.email ? 'is-invalid' : ''}`}
+                    placeholder="Ej: usuario@dominio.com"
+                    value={email}
+                    onChange={(e) => handleEmailChange(e.target.value)}
+                    disabled={isAuthenticated && !!user} // Deshabilitar si está logueado
+                  />
+                  {errors.email && <div className="form-error">{errors.email}</div>}
+                  <small className="text-muted">Formato: usuario@dominio.com (sin números en el dominio).</small>
+                </div>
+
+                {/* Campo: Dirección - SIEMPRE OBLIGATORIO */}
+                <div className="mb-3">
+                  <label htmlFor="checkoutDireccion" className="form-label">
+                    Dirección <span className="text-danger">*</span>
+                  </label>
+                  <input
+                    id="checkoutDireccion"
+                    type="text"
+                    className={`form-control ${errors.direccion ? 'is-invalid' : ''}`}
+                    placeholder="Ej: Av. Providencia 123, Depto 4"
+                    value={direccion}
+                    onChange={(e) => handleDireccionChange(e.target.value)}
+                  />
+                  {errors.direccion && <div className="form-error">{errors.direccion}</div>}
+                  <small className="text-muted">Debe contener palabra y número (ej: Calle 123).</small>
+                </div>
+
+                {/* Campo: Teléfono - SIEMPRE OBLIGATORIO */}
+                <div className="mb-3">
+                  <label htmlFor="checkoutTelefono" className="form-label">
+                    Teléfono <span className="text-danger">*</span>
+                  </label>
+                  <input
+                    id="checkoutTelefono"
+                    type="tel"
+                    className={`form-control ${errors.telefono ? 'is-invalid' : ''}`}
+                    placeholder="+569 1234 5678"
+                    value={telefono}
+                    onChange={(e) => handleTelefonoChange(e.target.value)}
+                  />
+                  {errors.telefono && <div className="form-error">{errors.telefono}</div>}
+                  <small className="text-muted">Formato: +569 seguido de 8 dígitos (ej: +56912345678).</small>
+                </div>
+
+                <button type="submit" className="btn btn-add-cart w-100">
+                  {isAuthenticated ? 'Realizar pedido' : 'Enviar pedido'}
+                </button>
+              </form>
 
               {message && <div className="form-message mt-3">{message}</div>}
             </section>
