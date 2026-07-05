@@ -80,3 +80,8 @@ __pycache__/
 *.tmp
 *.temp
 .vscode-test/
+
+# Archivos de configuración de Firebase (si usas)
+.env
+.env.local
+.env*.local
