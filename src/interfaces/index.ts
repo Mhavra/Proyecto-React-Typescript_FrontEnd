@@ -3,18 +3,18 @@
  * USUARIO - Representa un usuario del sistema
  */
 export interface Usuario {
-  id: number;
+  id: string;
   nombre: string;
   email: string;
   password: string;
-  rol: 'admin' | 'cliente';  
+  rol: 'admin' | 'cliente';
 }
 
 /**
  * PRODUCTO - Representa un producto de la tienda
  */
 export interface Producto {
-  id: number;  
+  id: string;
   nombre: string;
   categoria: string;
   precio: number;
@@ -27,11 +27,11 @@ export interface Producto {
  * PEDIDO - Representa un pedido realizado por un cliente
  */
 export interface Pedido {
-  id: number;
+  id: string;
   cliente: string;
-  email?: string;          
-  direccion?: string;      
-  telefono?: string;       
+  email?: string;
+  direccion?: string;
+  telefono?: string;
   fecha: string;
   productos: { id: string | number; cantidad: number; precio: number }[];
   total: number;
@@ -42,13 +42,13 @@ export interface Pedido {
  * CONSULTA - Representa una consulta de servicio al cliente
  */
 export interface Consulta {
-  id: number;
+  id: string;
   nombre: string;
   apellido: string;
   email: string;
   motivo: string;
-  fecha: string;   
-  hora: string;    
+  fecha: string;
+  hora: string;
   estado: 'no_leida' | 'leida' | 'respondida';
   respuesta?: string;
 }
