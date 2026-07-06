@@ -1,5 +1,5 @@
-//Nuevo: operaciones CRUD con Firestore
-
+// src/services/firestoreService.ts
+// Servicio para operaciones CRUD en Firestore.
 // Los IDs se manejan como number (convertimos desde string).
 
 import {
@@ -10,13 +10,10 @@ import {
   deleteDoc,
   doc,
   getDoc,
+  setDoc,
 } from 'firebase/firestore';
 import { db } from '@/firebase/config';
 
-/**
- * Obtiene todos los documentos de una colección.
- * Convierte el ID string de Firestore a number.
- */
 export const getItems = async <T extends { id: number }>(
   collectionName: string
 ): Promise<T[]> => {
@@ -27,25 +24,29 @@ export const getItems = async <T extends { id: number }>(
   });
 };
 
-/**
- * Agrega un nuevo documento a una colección.
- * Firestore genera automáticamente el ID como string,
- * pero lo convertimos a number al devolverlo.
- */
-export const addItemWithId = async <T extends { id: number }>(
+export const addItem = async <T extends { id: number }>(
   collectionName: string,
-  id: number,
   data: Omit<T, 'id'>
 ): Promise<T> => {
-  const docRef = doc(db, collectionName, String(id));
-  await setDoc(docRef, data);
-  return { id, ...data } as T;
+  const docRef = await addDoc(collection(db, collectionName), data);
+  return { id: Number(docRef.id), ...data } as T;
 };
 
 /**
- * Actualiza un documento existente por ID (número).
- * Internamente convertimos el ID a string para Firestore.
+ * Agrega un documento con ID específico (manteniendo el ID numérico).
+ * Se castea a any para evitar conflictos de tipos con Firestore.
  */
+export const addItemWithId = async (
+  collectionName: string,
+  id: number,
+  data: any
+): Promise<any> => {
+  const docRef = doc(db, collectionName, String(id));
+  // Cast a any para evitar errores de tipos
+  await setDoc(docRef as any, data);
+  return { id, ...data };
+};
+
 export const updateItem = async <T extends { id: number }>(
   collectionName: string,
   id: number,
@@ -55,10 +56,6 @@ export const updateItem = async <T extends { id: number }>(
   await updateDoc(docRef, updates);
 };
 
-/**
- * Elimina un documento por ID (número).
- * Internamente convertimos el ID a string para Firestore.
- */
 export const deleteItem = async (
   collectionName: string,
   id: number
@@ -67,10 +64,6 @@ export const deleteItem = async (
   await deleteDoc(docRef);
 };
 
-/**
- * Obtiene un documento por ID (número).
- * Convierte el ID string de Firestore a number.
- */
 export const getItemById = async <T extends { id: number }>(
   collectionName: string,
   id: number
