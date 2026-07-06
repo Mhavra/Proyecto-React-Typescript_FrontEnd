@@ -1,88 +1,57 @@
-/**
- * USUARIOS PAGE - Gestión de usuarios
- * 
- * @page /usuarios
- */
+// src/pages/UsuariosPage.tsx
+// Gestión de usuarios con Firestore.
+// Los IDs se mantienen como number.
 
 'use client';
 
 import { useState } from 'react';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
-import { storage, STORAGE_KEYS } from '@/services/localStorageService';
+import { useFirestore } from '@/hooks/useFirestore';
 import { Usuario } from '@/interfaces';
 import SearchBar from '@/components/common/SearchBar';
 import UsuarioList from '@/components/usuarios/UserList';
 import UsuarioForm from '@/components/usuarios/UserForm';
 
 export default function UsuariosPage() {
-  // Estado de usuarios con persistencia en localStorage
-  const [usuarios, setUsuarios] = useLocalStorage<Usuario[]>(STORAGE_KEYS.USUARIOS, []);
-  // Estado para la búsqueda
+  const { items: usuarios, loading, create, update, remove } = useFirestore<Usuario>('usuarios');
   const [search, setSearch] = useState('');
-  // Estado para mostrar/ocultar el formulario
   const [showForm, setShowForm] = useState(false);
-  // Estado para el usuario que se está editando
   const [editingUser, setEditingUser] = useState<Usuario | null>(null);
 
-  /**
-   * Filtra usuarios por nombre o email
-   */
-  const filteredUsuarios = usuarios.filter(u =>
+  const filteredUsuarios = usuarios.filter((u) =>
     u.nombre.toLowerCase().includes(search.toLowerCase()) ||
     u.email.toLowerCase().includes(search.toLowerCase())
   );
 
-  /**
-   * Maneja la creación/edición de un usuario
-   * @param usuario - Datos del usuario (sin ID)
-   */
-  const handleSave = (usuario: Omit<Usuario, 'id'>) => {
+  const handleSave = async (usuario: Omit<Usuario, 'id'>) => {
     if (editingUser) {
-      // Editar usuario existente
-      storage.updateItem<Usuario>(STORAGE_KEYS.USUARIOS, editingUser.id, usuario);
-      setUsuarios(storage.get<Usuario>(STORAGE_KEYS.USUARIOS));
+      await update(editingUser.id, usuario);
+      setEditingUser(null);
     } else {
-      // Crear nuevo usuario
-      storage.addItem<Usuario>(STORAGE_KEYS.USUARIOS, usuario);
-      setUsuarios(storage.get<Usuario>(STORAGE_KEYS.USUARIOS));
+      await create(usuario);
     }
-    // Cerrar formulario y limpiar estado de edición
     setShowForm(false);
-    setEditingUser(null);
   };
 
-  /**
-   * Maneja la edición de un usuario
-   * Abre el formulario con los datos del usuario seleccionado
-   * @param usuario - Usuario a editar
-   */
   const handleEdit = (usuario: Usuario) => {
     setEditingUser(usuario);
     setShowForm(true);
   };
 
-  /**
-   * Maneja la eliminación de un usuario (con confirmación)
-   * @param id - ID del usuario a eliminar
-   */
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number) => {
     if (confirm('¿Eliminar este usuario?')) {
-      storage.deleteItem<Usuario>(STORAGE_KEYS.USUARIOS, id);
-      setUsuarios(storage.get<Usuario>(STORAGE_KEYS.USUARIOS));
+      await remove(id);
     }
   };
 
-  /**
-   * Cancela la edición/creación
-   */
   const handleCancel = () => {
     setShowForm(false);
     setEditingUser(null);
   };
 
+  if (loading) return <div className="text-center py-5">Cargando usuarios...</div>;
+
   return (
     <div>
-      {/* Header con título y botón de nuevo usuario */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h4 className="fw-bold mb-0">Usuarios</h4>
         <button
@@ -94,14 +63,12 @@ export default function UsuariosPage() {
         </button>
       </div>
 
-      {/* Barra de búsqueda */}
       <SearchBar
         placeholder="Buscar usuarios por nombre o email..."
         value={search}
         onChange={setSearch}
       />
 
-      {/* Formulario de usuario (se muestra en creación/edición) */}
       {showForm && (
         <div className="card shadow-sm mb-4">
           <div className="card-body">
@@ -117,7 +84,6 @@ export default function UsuariosPage() {
         </div>
       )}
 
-      {/* Lista de usuarios */}
       <UsuarioList
         usuarios={filteredUsuarios}
         onEdit={handleEdit}

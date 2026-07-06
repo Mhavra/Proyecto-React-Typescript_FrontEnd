@@ -33,15 +33,16 @@ Cambios y mejoras respecto a la segunda etapa
 
 -Dashboard y estadísticas: Se añade una página de inicio con resumen de métricas (productos, pedidos, consultas, usuarios) para una visión rápida del negocio.
 
--Diseño consistente y modo oscuro: Se conserva la identidad visual de Frenesí (colores, iconos) y el modo oscuro/claro implementado en la ES2, ahora gestionado desde React con localStorage.
+-Diseño consistente y modo oscuro: Se conserva la identidad visual de Frenesí (colores, iconos) y el modo oscuro/claro implementado en la ES2, ahora gestionado desde Firebase.
 
 ## Tecnologías Utilizadas
 
 - **React 18** con **TypeScript**: Para construir una interfaz de usuario robusta y tipada.
 - **React Router DOM**: Para la navegación sin recarga de página (SPA).
 - **Bootstrap 5**: Para los estilos y componentes visuales.
-- **localStorage**: Para la persistencia de datos en el navegador.
-- **Context API**: Para la gestión del estado de autenticación.
+- **Firebase Authentication** (login real)
+- **Firestore** (base de datos en tiempo real)
+- **Context API** (autenticación global)
 
 ## Listado de secciones que tendrá el sitio web.
 
@@ -78,10 +79,18 @@ cd Proyecto-React-Typescript_FrontEnd
 
 # 3. Instalar las dependencias
 npm install  / yarn install
-
+npm config set legacy-peer-deps true
+npm install firebase
 # 4. Instalar dependencias adicionales para Bootstrap, por si lo pide
 npm install @popperjs/core 
 
 # 5. Ejecutar el servidor de desarrollo
 npm run dev
 
+## 🔥 Configuración de Firebase
+
+1. Crea un proyecto en [Firebase Console](https://console.firebase.google.com/).
+2. Habilita **Authentication** (método Email/Password).
+3. Crea una base de datos **Firestore** en modo de prueba.
+4. Obtén las credenciales de tu app (Configuración del proyecto > Tus apps > Configuración del SDK).
+5. Crea un archivo `.env` en la raíz con las siguientes variables:

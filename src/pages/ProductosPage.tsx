@@ -1,83 +1,58 @@
-/**
- * PRODUCTOS PAGE - Gestión de productos
- * 
- * Funcionalidades:
- * - Listado de productos con búsqueda
- * - Crear, editar y eliminar productos
- * 
- * @page /productos
- */
+// src/pages/ProductosPage.tsx
+// Gestión de productos con Firestore.
+// Los IDs se mantienen como number.
 
 'use client';
 
 import { useState } from 'react';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
-import { storage, STORAGE_KEYS } from '@/services/localStorageService';
+import { useFirestore } from '@/hooks/useFirestore';
 import { Producto } from '@/interfaces';
 import SearchBar from '@/components/common/SearchBar';
 import ProductoForm from '@/components/productos/ProductForm';
 import ProductoList from '@/components/productos/ProductList';
 
 export default function ProductosPage() {
-  const [productos, setProductos] = useLocalStorage<Producto[]>(STORAGE_KEYS.PRODUCTOS, []);
+  const { items: productos, loading, create, update, remove } = useFirestore<Producto>('productos');
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Producto | null>(null);
 
-  /**
-   * Filtra productos por nombre o categoría
-   */
-  const filteredProductos = productos.filter(p =>
+  // Filtro en tiempo real por nombre o categoría
+  const filteredProductos = productos.filter((p) =>
     p.nombre.toLowerCase().includes(search.toLowerCase()) ||
     p.categoria.toLowerCase().includes(search.toLowerCase())
   );
 
-  /**
-   * Maneja la creación/edición de un producto
-   */
-  const handleSave = (producto: Omit<Producto, 'id'>) => {
+  const handleSave = async (producto: Omit<Producto, 'id'>) => {
     if (editingProduct) {
-      // Editar
-      storage.updateItem<Producto>(STORAGE_KEYS.PRODUCTOS, editingProduct.id, producto);
-      setProductos(storage.get<Producto>(STORAGE_KEYS.PRODUCTOS));
+      await update(editingProduct.id, producto);
+      setEditingProduct(null);
     } else {
-      // Crear
-      storage.addItem<Producto>(STORAGE_KEYS.PRODUCTOS, producto);
-      setProductos(storage.get<Producto>(STORAGE_KEYS.PRODUCTOS));
+      await create(producto);
     }
     setShowForm(false);
-    setEditingProduct(null);
   };
 
-  /**
-   * Maneja la edición de un producto
-   */
   const handleEdit = (producto: Producto) => {
     setEditingProduct(producto);
     setShowForm(true);
   };
 
-  /**
-   * Maneja la eliminación de un producto
-   */
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number) => {
     if (confirm('¿Eliminar este producto?')) {
-      storage.deleteItem<Producto>(STORAGE_KEYS.PRODUCTOS, id);
-      setProductos(storage.get<Producto>(STORAGE_KEYS.PRODUCTOS));
+      await remove(id);
     }
   };
 
-  /**
-   * Cancela el formulario
-   */
   const handleCancel = () => {
     setShowForm(false);
     setEditingProduct(null);
   };
 
+  if (loading) return <div className="text-center py-5">Cargando productos...</div>;
+
   return (
     <div>
-      {/* Header con título y botón de nuevo producto */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h4 className="fw-bold mb-0">Productos</h4>
         <button
@@ -89,14 +64,12 @@ export default function ProductosPage() {
         </button>
       </div>
 
-      {/* Barra de búsqueda */}
       <SearchBar
         placeholder="Buscar productos por nombre o categoría..."
         value={search}
         onChange={setSearch}
       />
 
-      {/* Formulario de producto (se muestra en creación/edición) */}
       {showForm && (
         <div className="card shadow-sm mb-4">
           <div className="card-body">
@@ -112,7 +85,6 @@ export default function ProductosPage() {
         </div>
       )}
 
-      {/* Lista de productos */}
       <ProductoList
         productos={filteredProductos}
         onEdit={handleEdit}
