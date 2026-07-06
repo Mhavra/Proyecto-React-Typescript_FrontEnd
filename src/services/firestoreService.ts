@@ -53,7 +53,7 @@ export const updateItem = async <T extends { id: number }>(
   updates: Partial<T>
 ): Promise<void> => {
   const docRef = doc(db, collectionName, String(id));
-  await updateDoc(docRef, updates);
+  await updateDoc(docRef as any, updates);
 };
 
 export const deleteItem = async (
@@ -61,7 +61,7 @@ export const deleteItem = async (
   id: number
 ): Promise<void> => {
   const docRef = doc(db, collectionName, String(id));
-  await deleteDoc(docRef);
+  await deleteDoc(docRef as any);
 };
 
 export const getItemById = async <T extends { id: number }>(
