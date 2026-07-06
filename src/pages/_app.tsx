@@ -24,6 +24,9 @@ import { useEffect } from 'react';
 import { defaultProducts } from '@/data/defaultProducts';
 import { Producto } from '@/interfaces';
 
+import { doc, setDoc } from 'firebase/firestore';
+import { db } from '@/firebase/config';
+
 import '../styles/globals.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
@@ -33,21 +36,25 @@ function AppRoutes() {
   const navigate = useNavigate();
 
   /**
-   * Inicializa productos por defecto en Firestore si la colección está vacía.
+   * Inicializa productos por defecto en Firestore usando IDs numéricos.
    * Se ejecuta una sola vez al montar la aplicación.
-   * Los productos se crean sin ID (Firestore lo genera automáticamente).
    */
   useEffect(() => {
     const initializeProducts = async () => {
       try {
+        // 1. Verificar si ya hay productos en la colección
         const existing = await getItems<Producto>('productos');
         if (existing.length === 0) {
+          // 2. Si está vacía, subir todos los productos con sus IDs originales
           for (const product of defaultProducts) {
-            // Omitimos el id (Firestore lo genera como string, luego convertimos a number)
+            // 3. Crear una copia del producto sin el campo id (Firestore lo usa como ID del documento)
             const { id, ...productData } = product;
-            await addItem<Producto>('productos', productData);
+            // 4. Crear referencia al documento con el ID numérico convertido a string
+            const docRef = doc(db, 'productos', String(id));
+            // 5. Guardar el documento en Firestore
+            await setDoc(docRef, productData);
           }
-          console.log('✅ Productos iniciales agregados a Firestore');
+          console.log('✅ Productos iniciales agregados a Firestore con IDs numéricos (1 al 20)');
         }
       } catch (error) {
         console.error('❌ Error al inicializar productos:', error);

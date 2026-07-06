@@ -32,12 +32,14 @@ export const getItems = async <T extends { id: number }>(
  * Firestore genera automáticamente el ID como string,
  * pero lo convertimos a number al devolverlo.
  */
-export const addItem = async <T extends { id: number }>(
+export const addItemWithId = async <T extends { id: number }>(
   collectionName: string,
+  id: number,
   data: Omit<T, 'id'>
 ): Promise<T> => {
-  const docRef = await addDoc(collection(db, collectionName), data);
-  return { id: Number(docRef.id), ...data } as T;
+  const docRef = doc(db, collectionName, String(id));
+  await setDoc(docRef, data);
+  return { id, ...data } as T;
 };
 
 /**
