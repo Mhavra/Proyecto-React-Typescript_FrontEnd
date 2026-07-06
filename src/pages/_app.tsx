@@ -1,5 +1,8 @@
 // src/pages/_app.tsx
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate} from 'react-router-dom';
+// Punto de entrada de la aplicación.
+// Aquí se inicializan los productos por defecto en Firestore si no existen.
+
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import PrivateRoute from '@/components/common/PrivateRoute';
 import AdminLayout from '@/components/common/Layout';
@@ -16,7 +19,7 @@ import PedidosPage from '@/pages/PedidosPage';
 import ConsultasPage from '@/pages/ConsultasPage';
 import UsuariosPage from '@/pages/UsuariosPage';
 
-import { storage, STORAGE_KEYS } from '@/services/localStorageService';
+import { getItems, addItem } from '@/services/firestoreService';
 import { useEffect } from 'react';
 import { defaultProducts } from '@/data/defaultProducts';
 import { Producto } from '@/interfaces';
@@ -25,17 +28,32 @@ import '../styles/globals.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
-
 function AppRoutes() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  // Inicializar productos por defecto
+  /**
+   * Inicializa productos por defecto en Firestore si la colección está vacía.
+   * Se ejecuta una sola vez al montar la aplicación.
+   * Los productos se crean sin ID (Firestore lo genera automáticamente).
+   */
   useEffect(() => {
-    const products = storage.get<Producto>(STORAGE_KEYS.PRODUCTOS);
-    if (products.length === 0) {
-      storage.setItem(STORAGE_KEYS.PRODUCTOS, defaultProducts);
-    }
+    const initializeProducts = async () => {
+      try {
+        const existing = await getItems<Producto>('productos');
+        if (existing.length === 0) {
+          for (const product of defaultProducts) {
+            // Omitimos el id (Firestore lo genera como string, luego convertimos a number)
+            const { id, ...productData } = product;
+            await addItem<Producto>('productos', productData);
+          }
+          console.log('✅ Productos iniciales agregados a Firestore');
+        }
+      } catch (error) {
+        console.error('❌ Error al inicializar productos:', error);
+      }
+    };
+    initializeProducts();
   }, []);
 
   const handleLogout = () => {
@@ -58,7 +76,7 @@ function AppRoutes() {
         path="/dashboard"
         element={
           <PrivateRoute allowedRoles={['admin']}>
-            <AdminLayout user={user!} onLogout={logout}>
+            <AdminLayout user={user!} onLogout={handleLogout}>
               <DashboardPage />
             </AdminLayout>
           </PrivateRoute>
@@ -68,18 +86,17 @@ function AppRoutes() {
         path="/productos"
         element={
           <PrivateRoute allowedRoles={['admin']}>
-            <AdminLayout user={user!} onLogout={logout}>
+            <AdminLayout user={user!} onLogout={handleLogout}>
               <ProductosPage />
             </AdminLayout>
           </PrivateRoute>
         }
       />
       <Route
-        path="/productos/:id" 
-        //ruta dinamica para detalle de producto, se pasa el id del producto en la url usando useParams en ProductoDetallePage
+        path="/productos/:id"
         element={
           <PrivateRoute allowedRoles={['admin']}>
-            <AdminLayout user={user!} onLogout={logout}>
+            <AdminLayout user={user!} onLogout={handleLogout}>
               <ProductoDetallePage />
             </AdminLayout>
           </PrivateRoute>
@@ -89,7 +106,7 @@ function AppRoutes() {
         path="/pedidos"
         element={
           <PrivateRoute allowedRoles={['admin']}>
-            <AdminLayout user={user!} onLogout={logout}>
+            <AdminLayout user={user!} onLogout={handleLogout}>
               <PedidosPage />
             </AdminLayout>
           </PrivateRoute>
@@ -99,7 +116,7 @@ function AppRoutes() {
         path="/consultas"
         element={
           <PrivateRoute allowedRoles={['admin']}>
-            <AdminLayout user={user!} onLogout={logout}>
+            <AdminLayout user={user!} onLogout={handleLogout}>
               <ConsultasPage />
             </AdminLayout>
           </PrivateRoute>
@@ -109,13 +126,12 @@ function AppRoutes() {
         path="/usuarios"
         element={
           <PrivateRoute allowedRoles={['admin']}>
-            <AdminLayout user={user!} onLogout={logout}>
+            <AdminLayout user={user!} onLogout={handleLogout}>
               <UsuariosPage />
             </AdminLayout>
           </PrivateRoute>
         }
       />
-      {/* Ruta de fallback: redirige a la tienda */}
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );
