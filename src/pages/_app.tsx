@@ -19,8 +19,7 @@ import PedidosPage from '@/pages/PedidosPage';
 import ConsultasPage from '@/pages/ConsultasPage';
 import UsuariosPage from '@/pages/UsuariosPage';
 
-// ✅ Importación única (sin duplicados)
-import { getItems} from '@/services/firestoreService';
+import { getItems, addItemWithId } from '@/services/firestoreService';
 import { useEffect } from 'react';
 import { defaultProducts } from '@/data/defaultProducts';
 import { Producto } from '@/interfaces';
@@ -40,8 +39,7 @@ function AppRoutes() {
         if (existing.length === 0) {
           for (const product of defaultProducts) {
             const { id, ...productData } = product;
-            // addItem devuelve any, pero sabemos que es Producto
-            await addItem('productos', id, productData);
+            await addItemWithId('productos', id, productData);
           }
           console.log('✅ Productos iniciales agregados a Firestore con IDs numéricos (1 al 20)');
         }

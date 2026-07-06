@@ -32,17 +32,12 @@ export const addItem = async <T extends { id: number }>(
   return { id: Number(docRef.id), ...data } as T;
 };
 
-/**
- * Agrega un documento con ID específico (manteniendo el ID numérico).
- * Se castea a any para evitar conflictos de tipos con Firestore.
- */
 export const addItemWithId = async (
   collectionName: string,
   id: number,
   data: any
 ): Promise<any> => {
   const docRef = doc(db, collectionName, String(id));
-  // Cast a any para evitar errores de tipos
   await setDoc(docRef as any, data);
   return { id, ...data };
 };
