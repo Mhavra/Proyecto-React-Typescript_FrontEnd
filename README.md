@@ -78,7 +78,8 @@ cd Proyecto-React-Typescript_FrontEnd
 
 # 3. Instalar las dependencias
 npm install  / yarn install
-
+npm config set legacy-peer-deps true
+npm install firebase
 # 4. Instalar dependencias adicionales para Bootstrap, por si lo pide
 npm install @popperjs/core 
 
