@@ -16,7 +16,7 @@ export interface Usuario {
  * PRODUCTO - Representa un producto de la tienda
  */
 export interface Producto {
-  id: string;
+  id: number;
   nombre: string;
   categoria: string;
   precio: number;

@@ -1,6 +1,5 @@
 // src/hooks/useFirestore.ts
 // Custom hook para gestionar datos de Firestore con estado reactivo.
-// Mantiene los IDs como number.
 
 import { useState, useEffect } from 'react';
 import { getItems, addItem, updateItem, deleteItem } from '@/services/firestoreService';
@@ -10,10 +9,6 @@ export function useFirestore<T extends { id: number }>(collectionName: string) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  /**
-   * Carga los datos desde Firestore al montar el componente.
-   * Se ejecuta una sola vez (array de dependencias vacío).
-   */
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -32,9 +27,6 @@ export function useFirestore<T extends { id: number }>(collectionName: string) {
     fetchData();
   }, [collectionName]);
 
-  /**
-   * Crea un nuevo documento en Firestore.
-   */
   const create = async (data: Omit<T, 'id'>) => {
     try {
       const newItem = await addItem<T>(collectionName, data);
@@ -46,9 +38,6 @@ export function useFirestore<T extends { id: number }>(collectionName: string) {
     }
   };
 
-  /**
-   * Actualiza un documento existente en Firestore.
-   */
   const update = async (id: number, data: Partial<T>) => {
     try {
       await updateItem(collectionName, id, data);
@@ -61,9 +50,6 @@ export function useFirestore<T extends { id: number }>(collectionName: string) {
     }
   };
 
-  /**
-   * Elimina un documento de Firestore.
-   */
   const remove = async (id: number) => {
     try {
       await deleteItem(collectionName, id);

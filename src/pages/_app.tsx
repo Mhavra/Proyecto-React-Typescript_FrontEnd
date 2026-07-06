@@ -19,13 +19,10 @@ import PedidosPage from '@/pages/PedidosPage';
 import ConsultasPage from '@/pages/ConsultasPage';
 import UsuariosPage from '@/pages/UsuariosPage';
 
-import { getItems, addItem } from '@/services/firestoreService';
+import { getItems, addItemWithId } from '@/services/firestoreService';
 import { useEffect } from 'react';
 import { defaultProducts } from '@/data/defaultProducts';
 import { Producto } from '@/interfaces';
-
-import { doc, setDoc } from 'firebase/firestore';
-import { db } from '@/firebase/config';
 
 import '../styles/globals.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -35,24 +32,14 @@ function AppRoutes() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  /**
-   * Inicializa productos por defecto en Firestore usando IDs numéricos.
-   * Se ejecuta una sola vez al montar la aplicación.
-   */
   useEffect(() => {
     const initializeProducts = async () => {
       try {
-        // 1. Verificar si ya hay productos en la colección
         const existing = await getItems<Producto>('productos');
         if (existing.length === 0) {
-          // 2. Si está vacía, subir todos los productos con sus IDs originales
           for (const product of defaultProducts) {
-            // 3. Crear una copia del producto sin el campo id (Firestore lo usa como ID del documento)
             const { id, ...productData } = product;
-            // 4. Crear referencia al documento con el ID numérico convertido a string
-            const docRef = doc(db, 'productos', String(id));
-            // 5. Guardar el documento en Firestore
-            await setDoc(docRef, productData);
+            await addItemWithId('productos', id, productData);
           }
           console.log('✅ Productos iniciales agregados a Firestore con IDs numéricos (1 al 20)');
         }
@@ -70,7 +57,6 @@ function AppRoutes() {
 
   return (
     <Routes>
-      {/* Rutas públicas (accesibles sin autenticación) */}
       <Route path="/" element={<TiendaPage />} />
       <Route path="/novedades" element={<NovedadesPage />} />
       <Route path="/servicio-cliente" element={<ServicioClientePage />} />
@@ -78,7 +64,6 @@ function AppRoutes() {
       <Route path="/acerca-de-nosotros" element={<AcercaDeNosotrosPage />} />
       <Route path="/login" element={<LoginPage />} />
 
-      {/* Rutas privadas (solo admin) */}
       <Route
         path="/dashboard"
         element={
