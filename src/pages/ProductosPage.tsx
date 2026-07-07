@@ -1,36 +1,57 @@
 // src/pages/ProductosPage.tsx
-// Gestión de productos con Firestore.
-// Los IDs se mantienen como number.
-
 'use client';
 
-import { useState } from 'react';
-import { useFirestore } from '@/hooks/useFirestore';
+import { useState, useEffect } from 'react';
+import { getCollection, addDocument, updateDocument, deleteDocument } from '@/services/firestoreService';
 import { Producto } from '@/interfaces';
 import SearchBar from '@/components/common/SearchBar';
 import ProductoForm from '@/components/productos/ProductForm';
 import ProductoList from '@/components/productos/ProductList';
 
 export default function ProductosPage() {
-  const { items: productos, loading, create, update, remove } = useFirestore<Producto>('productos');
+  const [productos, setProductos] = useState<Producto[]>([]);
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Producto | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  // Filtro en tiempo real por nombre o categoría
-  const filteredProductos = productos.filter((p) =>
+  const cargarProductos = async () => {
+    try {
+      setLoading(true);
+      const data = await getCollection<Producto>('productos');
+      setProductos(data);
+      setError('');
+    } catch (err) {
+      setError('Error al cargar productos');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    cargarProductos();
+  }, []);
+
+  const filteredProductos = productos.filter(p =>
     p.nombre.toLowerCase().includes(search.toLowerCase()) ||
     p.categoria.toLowerCase().includes(search.toLowerCase())
   );
 
   const handleSave = async (producto: Omit<Producto, 'id'>) => {
-    if (editingProduct) {
-      await update(editingProduct.id, producto);
+    try {
+      if (editingProduct) {
+        await updateDocument('productos', editingProduct.id, producto);
+      } else {
+        await addDocument('productos', producto);
+      }
+      await cargarProductos();
+      setShowForm(false);
       setEditingProduct(null);
-    } else {
-      await create(producto);
+    } catch (err) {
+      setError('Error al guardar producto');
     }
-    setShowForm(false);
   };
 
   const handleEdit = (producto: Producto) => {
@@ -38,9 +59,14 @@ export default function ProductosPage() {
     setShowForm(true);
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (confirm('¿Eliminar este producto?')) {
-      await remove(id);
+      try {
+        await deleteDocument('productos', id);
+        await cargarProductos();
+      } catch (err) {
+        setError('Error al eliminar producto');
+      }
     }
   };
 
@@ -63,6 +89,8 @@ export default function ProductosPage() {
           Nuevo Producto
         </button>
       </div>
+
+      {error && <div className="alert alert-danger">{error}</div>}
 
       <SearchBar
         placeholder="Buscar productos por nombre o categoría..."

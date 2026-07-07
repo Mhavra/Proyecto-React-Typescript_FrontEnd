@@ -8,8 +8,6 @@ next-env.d.ts
 .yarn/
 yarn-error.log
 npm-debug.log*
-package-lock.json
-yarn.lock
 
 # Build y distribución
 /build

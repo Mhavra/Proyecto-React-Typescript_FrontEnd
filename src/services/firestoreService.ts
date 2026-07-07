@@ -1,73 +1,49 @@
-// src/services/firestoreService.ts
-// Servicio para operaciones CRUD en Firestore.
-// Los IDs se manejan como number (convertimos desde string).
-
+import { db } from '@/lib/firebase';
 import {
   collection,
   getDocs,
+  doc,
   addDoc,
   updateDoc,
   deleteDoc,
-  doc,
   getDoc,
   setDoc,
 } from 'firebase/firestore';
-import { db } from '@/firebase/config';
 
-export const getItems = async <T extends { id: number }>(
-  collectionName: string
-): Promise<T[]> => {
-  const snapshot = await getDocs(collection(db, collectionName));
-  return snapshot.docs.map((doc) => {
-    const data = doc.data();
-    return { ...data, id: Number(doc.id) } as T;
+export const getCollection = async <T>(collectionName: string): Promise<T[]> => {
+  const querySnapshot = await getDocs(collection(db, collectionName));
+  const items: T[] = [];
+  querySnapshot.forEach((doc) => {
+    items.push({ id: doc.id, ...doc.data() } as T);
   });
+  return items;
 };
 
-export const addItem = async <T extends { id: number }>(
-  collectionName: string,
-  data: Omit<T, 'id'>
-): Promise<T> => {
-  const docRef = await addDoc(collection(db, collectionName), data);
-  return { id: Number(docRef.id), ...data } as T;
-};
-
-export const addItemWithId = async (
-  collectionName: string,
-  id: number,
-  data: any
-): Promise<any> => {
-  const docRef = doc(db, collectionName, String(id));
-  await setDoc(docRef as any, data);
-  return { id, ...data };
-};
-
-export const updateItem = async <T extends { id: number }>(
-  collectionName: string,
-  id: number,
-  updates: Partial<T>
-): Promise<void> => {
-  const docRef = doc(db, collectionName, String(id));
-  await updateDoc(docRef as any, updates);
-};
-
-export const deleteItem = async (
-  collectionName: string,
-  id: number
-): Promise<void> => {
-  const docRef = doc(db, collectionName, String(id));
-  await deleteDoc(docRef as any);
-};
-
-export const getItemById = async <T extends { id: number }>(
-  collectionName: string,
-  id: number
-): Promise<T | null> => {
-  const docRef = doc(db, collectionName, String(id));
-  const snapshot = await getDoc(docRef);
-  if (snapshot.exists()) {
-    const data = snapshot.data();
-    return { ...data, id: Number(snapshot.id) } as T;
+export const getDocument = async <T>(collectionName: string, id: string): Promise<T | null> => {
+  const docSnap = await getDoc(doc(db, collectionName, id));
+  if (docSnap.exists()) {
+    return { id: docSnap.id, ...docSnap.data() } as T;
   }
   return null;
+};
+
+export const addDocument = async <T>(collectionName: string, data: Omit<T, 'id'>): Promise<T> => {
+  const docRef = await addDoc(collection(db, collectionName), data);
+  return { id: docRef.id, ...data } as T;
+};
+
+export const updateDocument = async <T>(collectionName: string, id: string, updates: Partial<T>): Promise<void> => {
+  await updateDoc(doc(db, collectionName, id), updates);
+};
+
+export const deleteDocument = async (collectionName: string, id: string): Promise<void> => {
+  await deleteDoc(doc(db, collectionName, id));
+};
+
+export const setDocument = async <T>(
+  collectionName: string,
+  id: string,
+  data: Omit<T, 'id'>
+): Promise<void> => {
+  await setDoc(doc(db, collectionName, id), data);
 };

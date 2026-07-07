@@ -1,29 +1,37 @@
-/**
- * CONSULTAS PAGE - Gestión de consultas de clientes
- * 
- * @page /consultas
- */
-
+// src/pages/ConsultasPage.tsx
 'use client';
 
-import { useState } from 'react';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
-import { storage, STORAGE_KEYS } from '@/services/localStorageService';
+import { useState, useEffect } from 'react';
+import { getCollection, updateDocument, deleteDocument } from '@/services/firestoreService';
 import { Consulta } from '@/interfaces';
 import SearchBar from '@/components/common/SearchBar';
 import ConsultaList from '@/components/consultas/ConsultaList';
 
 export default function ConsultasPage() {
-  // Estado de consultas con persistencia en localStorage
-  const [consultas, setConsultas] = useLocalStorage<Consulta[]>(STORAGE_KEYS.CONSULTAS, []);
-  // Estado para el filtro por estado
+  const [consultas, setConsultas] = useState<Consulta[]>([]);
   const [filtroEstado, setFiltroEstado] = useState<string>('todas');
-  // Estado para la búsqueda
   const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  /**
-   * Filtra consultas por estado seleccionado y cliente
-   */
+  const cargarConsultas = async () => {
+    try {
+      setLoading(true);
+      const data = await getCollection<Consulta>('consultas');
+      setConsultas(data);
+      setError('');
+    } catch (err) {
+      setError('Error al cargar consultas');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    cargarConsultas();
+  }, []);
+
   const consultasFiltradas = consultas.filter(c => {
     const matchesEstado = filtroEstado === 'todas' ? true : c.estado === filtroEstado;
     const matchesSearch = c.nombre.toLowerCase().includes(search.toLowerCase()) ||
@@ -32,37 +40,35 @@ export default function ConsultasPage() {
     return matchesEstado && matchesSearch;
   });
 
-  /**
-   * Cambia el estado de una consulta
-   * @param id - ID de la consulta
-   * @param nuevoEstado - Nuevo estado (leida o respondida)
-   * @param respuesta - Texto de respuesta (opcional)
-   */
-  const handleCambiarEstado = (id: number, nuevoEstado: 'leida' | 'respondida', respuesta?: string) => {
-    const updates: Partial<Consulta> = { estado: nuevoEstado };
-    if (respuesta !== undefined) {
-      updates.respuesta = respuesta;
+  const handleCambiarEstado = async (id: string, nuevoEstado: 'leida' | 'respondida', respuesta?: string) => {
+    try {
+      const updates: Partial<Consulta> = { estado: nuevoEstado };
+      if (respuesta !== undefined) updates.respuesta = respuesta;
+      await updateDocument('consultas', id, updates);
+      await cargarConsultas();
+    } catch (err) {
+      setError('Error al actualizar consulta');
     }
-    storage.updateItem<Consulta>(STORAGE_KEYS.CONSULTAS, id, updates);
-    setConsultas(storage.get<Consulta>(STORAGE_KEYS.CONSULTAS));
   };
 
-  /**
-   * Elimina una consulta (con confirmación)
-   * @param id - ID de la consulta a eliminar
-   */
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: string) => {
     if (confirm('¿Eliminar esta consulta?')) {
-      storage.deleteItem<Consulta>(STORAGE_KEYS.CONSULTAS, id);
-      setConsultas(storage.get<Consulta>(STORAGE_KEYS.CONSULTAS));
+      try {
+        await deleteDocument('consultas', id);
+        await cargarConsultas();
+      } catch (err) {
+        setError('Error al eliminar consulta');
+      }
     }
   };
+
+  if (loading) return <div className="text-center py-5">Cargando consultas...</div>;
 
   return (
     <div>
       <h4 className="fw-bold mb-4">Consultas de Clientes</h4>
+      {error && <div className="alert alert-danger">{error}</div>}
 
-      {/* Filtros por estado */}
       <div className="d-flex flex-wrap gap-2 mb-3">
         <button
           onClick={() => setFiltroEstado('todas')}

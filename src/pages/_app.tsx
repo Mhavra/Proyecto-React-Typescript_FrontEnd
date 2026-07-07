@@ -1,12 +1,9 @@
-// src/pages/_app.tsx
-// Punto de entrada de la aplicación.
-// Aquí se inicializan los productos por defecto en Firestore si no existen.
-
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import PrivateRoute from '@/components/common/PrivateRoute';
 import AdminLayout from '@/components/common/Layout';
 import LoginPage from '@/pages/LoginPage';
+import RegisterPage from '@/pages/RegisterPage';  // 🔥 NUEVO
 import TiendaPage from '@/pages/TiendaPage';
 import NovedadesPage from '@/pages/NovedadesPage';
 import ServicioClientePage from '@/pages/ServicioClientePage';
@@ -19,56 +16,30 @@ import PedidosPage from '@/pages/PedidosPage';
 import ConsultasPage from '@/pages/ConsultasPage';
 import UsuariosPage from '@/pages/UsuariosPage';
 
-import { getItems, addItemWithId } from '@/services/firestoreService';
-import { useEffect } from 'react';
-import { defaultProducts } from '@/data/defaultProducts';
-import { Producto } from '@/interfaces';
-
 import '../styles/globals.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
 function AppRoutes() {
   const { user, logout } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const initializeProducts = async () => {
-      try {
-        const existing = await getItems<Producto>('productos');
-        if (existing.length === 0) {
-          for (const product of defaultProducts) {
-            const { id, ...productData } = product;
-            await addItemWithId('productos', id, productData);
-          }
-          console.log('✅ Productos iniciales agregados a Firestore con IDs numéricos (1 al 20)');
-        }
-      } catch (error) {
-        console.error('❌ Error al inicializar productos:', error);
-      }
-    };
-    initializeProducts();
-  }, []);
-
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
 
   return (
     <Routes>
+      {/* Rutas públicas */}
       <Route path="/" element={<TiendaPage />} />
       <Route path="/novedades" element={<NovedadesPage />} />
       <Route path="/servicio-cliente" element={<ServicioClientePage />} />
       <Route path="/carrito" element={<CarritoPage />} />
       <Route path="/acerca-de-nosotros" element={<AcercaDeNosotrosPage />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />  {/* 🔥 NUEVA RUTA */}
 
+      {/* Rutas privadas (solo admin) */}
       <Route
         path="/dashboard"
         element={
           <PrivateRoute allowedRoles={['admin']}>
-            <AdminLayout user={user!} onLogout={handleLogout}>
+            <AdminLayout user={user!} onLogout={logout}>
               <DashboardPage />
             </AdminLayout>
           </PrivateRoute>
@@ -78,7 +49,7 @@ function AppRoutes() {
         path="/productos"
         element={
           <PrivateRoute allowedRoles={['admin']}>
-            <AdminLayout user={user!} onLogout={handleLogout}>
+            <AdminLayout user={user!} onLogout={logout}>
               <ProductosPage />
             </AdminLayout>
           </PrivateRoute>
@@ -88,7 +59,7 @@ function AppRoutes() {
         path="/productos/:id"
         element={
           <PrivateRoute allowedRoles={['admin']}>
-            <AdminLayout user={user!} onLogout={handleLogout}>
+            <AdminLayout user={user!} onLogout={logout}>
               <ProductoDetallePage />
             </AdminLayout>
           </PrivateRoute>
@@ -98,7 +69,7 @@ function AppRoutes() {
         path="/pedidos"
         element={
           <PrivateRoute allowedRoles={['admin']}>
-            <AdminLayout user={user!} onLogout={handleLogout}>
+            <AdminLayout user={user!} onLogout={logout}>
               <PedidosPage />
             </AdminLayout>
           </PrivateRoute>
@@ -108,7 +79,7 @@ function AppRoutes() {
         path="/consultas"
         element={
           <PrivateRoute allowedRoles={['admin']}>
-            <AdminLayout user={user!} onLogout={handleLogout}>
+            <AdminLayout user={user!} onLogout={logout}>
               <ConsultasPage />
             </AdminLayout>
           </PrivateRoute>
@@ -118,7 +89,7 @@ function AppRoutes() {
         path="/usuarios"
         element={
           <PrivateRoute allowedRoles={['admin']}>
-            <AdminLayout user={user!} onLogout={handleLogout}>
+            <AdminLayout user={user!} onLogout={logout}>
               <UsuariosPage />
             </AdminLayout>
           </PrivateRoute>

@@ -1,61 +1,69 @@
-/**
- * PEDIDOS PAGE - Gestión de pedidos
- * 
- * @page /pedidos
- */
-
 'use client';
 
-import { useState } from 'react';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
-import { storage, STORAGE_KEYS } from '@/services/localStorageService';
+import { useState, useEffect } from 'react';
+import { getCollection, updateDocument, deleteDocument } from '@/services/firestoreService';
 import { Pedido } from '@/interfaces';
 import SearchBar from '@/components/common/SearchBar';
 import PedidoList from '@/components/pedidos/PedidoList';
 
 export default function PedidosPage() {
-  // Estado de pedidos con persistencia en localStorage
-  const [pedidos, setPedidos] = useLocalStorage<Pedido[]>(STORAGE_KEYS.PEDIDOS, []);
-  // Estado para el filtro por estado
+  const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [filtroEstado, setFiltroEstado] = useState<string>('todos');
-  // Estado para la búsqueda por cliente
   const [search, setSearch] = useState('');
-  /**
-   * Filtra los pedidos según el estado seleccionado y la búsqueda
-   */
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const cargarPedidos = async () => {
+    try {
+      setLoading(true);
+      const data = await getCollection<Pedido>('pedidos');
+      setPedidos(data);
+      setError('');
+    } catch (err) {
+      setError('Error al cargar pedidos');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    cargarPedidos();
+  }, []);
+
   const pedidosFiltrados = pedidos.filter(p => {
     const matchesEstado = filtroEstado === 'todos' ? true : p.estado === filtroEstado;
     const matchesSearch = p.cliente.toLowerCase().includes(search.toLowerCase());
     return matchesEstado && matchesSearch;
   });
 
-  /**
-   * Cambia el estado de un pedido
-   * param id - ID del pedido
-   * param nuevoEstado - Nuevo estado del pedido
-   */
-  const handleCambiarEstado = (id: number, nuevoEstado: 'pendiente' | 'enviado' | 'entregado') => {
-    storage.updateItem<Pedido>(STORAGE_KEYS.PEDIDOS, id, { estado: nuevoEstado });
-    setPedidos(storage.get<Pedido>(STORAGE_KEYS.PEDIDOS));
-  };
-
-  /**
-   * Elimina un pedido
-   * param id - ID del pedido
-   */
-  const handleDelete = (id: number) => {
-    if (confirm('¿Eliminar este pedido?')) {
-      storage.deleteItem<Pedido>(STORAGE_KEYS.PEDIDOS, id);
-      setPedidos(storage.get<Pedido>(STORAGE_KEYS.PEDIDOS));
+  const handleCambiarEstado = async (id: string, nuevoEstado: 'pendiente' | 'enviado' | 'entregado') => {
+    try {
+      await updateDocument('pedidos', id, { estado: nuevoEstado });
+      await cargarPedidos();
+    } catch (err) {
+      setError('Error al actualizar estado');
     }
   };
 
+  const handleDelete = async (id: string) => {
+    if (confirm('¿Eliminar este pedido?')) {
+      try {
+        await deleteDocument('pedidos', id);
+        await cargarPedidos();
+      } catch (err) {
+        setError('Error al eliminar pedido');
+      }
+    }
+  };
+
+  if (loading) return <div className="text-center py-5">Cargando pedidos...</div>;
+
   return (
     <div>
-      {/* Título de la página */}
       <h4 className="fw-bold mb-4">Pedidos</h4>
+      {error && <div className="alert alert-danger">{error}</div>}
 
-      {/* Filtros por estado */}
       <div className="d-flex flex-wrap gap-2 mb-3">
         <button
           onClick={() => setFiltroEstado('todos')}
@@ -83,7 +91,6 @@ export default function PedidosPage() {
         </button>
       </div>
 
-      {/* Barra de búsqueda por cliente */}
       <SearchBar
         placeholder="Buscar por cliente..."
         value={search}
@@ -91,7 +98,6 @@ export default function PedidosPage() {
         className="mb-3"
       />
 
-      {/* Lista de pedidos */}
       <PedidoList
         pedidos={pedidosFiltrados}
         onCambiarEstado={handleCambiarEstado}

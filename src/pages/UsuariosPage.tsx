@@ -1,35 +1,90 @@
-// src/pages/UsuariosPage.tsx
-// Gestión de usuarios con Firestore.
-// Los IDs se mantienen como number.
-
 'use client';
 
-import { useState } from 'react';
-import { useFirestore } from '@/hooks/useFirestore';
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/context/AuthContext';
+import { getCollection, addDocument, updateDocument, deleteDocument } from '@/services/firestoreService';
+import { auth } from '@/lib/firebase';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { Usuario } from '@/interfaces';
 import SearchBar from '@/components/common/SearchBar';
 import UsuarioList from '@/components/usuarios/UserList';
 import UsuarioForm from '@/components/usuarios/UserForm';
 
 export default function UsuariosPage() {
-  const { items: usuarios, loading, create, update, remove } = useFirestore<Usuario>('usuarios');
+  const { user: currentUser } = useAuth();
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState<Usuario | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
 
-  const filteredUsuarios = usuarios.filter((u) =>
+  const cargarUsuarios = async () => {
+    try {
+      setLoading(true);
+      const data = await getCollection<Usuario>('usuario');
+      setUsuarios(data);
+      setError('');
+    } catch (err) {
+      setError('Error al cargar usuarios');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    cargarUsuarios();
+  }, []);
+
+  const filteredUsuarios = usuarios.filter(u =>
     u.nombre.toLowerCase().includes(search.toLowerCase()) ||
     u.email.toLowerCase().includes(search.toLowerCase())
   );
 
   const handleSave = async (usuario: Omit<Usuario, 'id'>) => {
-    if (editingUser) {
-      await update(editingUser.id, usuario);
-      setEditingUser(null);
-    } else {
-      await create(usuario);
+    setSaving(true);
+    setError('');
+    try {
+      if (editingUser) {
+        // Editar usuario existente (solo Firestore)
+        await updateDocument('usuario', editingUser.id, usuario);
+        await cargarUsuarios();
+        setShowForm(false);
+        setEditingUser(null);
+      } else {
+        // 🔥 Crear usuario NUEVO: primero en Auth, luego en Firestore
+        const userCredential = await createUserWithEmailAndPassword(
+          auth,
+          usuario.email,
+          usuario.password || '123456' // Usar password por defecto si no se envía
+        );
+        const uid = userCredential.user.uid;
+        
+        // Guardar en Firestore con el UID como ID
+        const usuarioData = {
+          nombre: usuario.nombre,
+          email: usuario.email,
+          rol: usuario.rol || 'cliente',
+        };
+        await addDocument('usuario', usuarioData);
+        
+        // Recargar lista
+        await cargarUsuarios();
+        setShowForm(false);
+        setEditingUser(null);
+      }
+    } catch (err: any) {
+      console.error('Error al guardar usuario:', err);
+      if (err.code === 'auth/email-already-in-use') {
+        setError('Este correo ya está registrado en Firebase Auth.');
+      } else {
+        setError('Error al guardar usuario: ' + (err.message || ''));
+      }
+    } finally {
+      setSaving(false);
     }
-    setShowForm(false);
   };
 
   const handleEdit = (usuario: Usuario) => {
@@ -37,9 +92,14 @@ export default function UsuariosPage() {
     setShowForm(true);
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (confirm('¿Eliminar este usuario?')) {
-      await remove(id);
+      try {
+        await deleteDocument('usuario', id);
+        await cargarUsuarios();
+      } catch (err) {
+        setError('Error al eliminar usuario');
+      }
     }
   };
 
@@ -57,11 +117,14 @@ export default function UsuariosPage() {
         <button
           className="btn" style={{ backgroundColor: '#6f42c1', color: 'white' }}
           onClick={() => setShowForm(true)}
+          disabled={saving}
         >
           <i className="bi bi-plus-circle me-1"></i>
           Nuevo Usuario
         </button>
       </div>
+
+      {error && <div className="alert alert-danger">{error}</div>}
 
       <SearchBar
         placeholder="Buscar usuarios por nombre o email..."
@@ -79,6 +142,7 @@ export default function UsuariosPage() {
               usuario={editingUser || undefined}
               onSave={handleSave}
               onCancel={handleCancel}
+              saving={saving}
             />
           </div>
         </div>

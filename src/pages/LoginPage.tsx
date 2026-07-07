@@ -4,8 +4,8 @@
 
 'use client';
 
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 
 export default function LoginPage() {
@@ -13,22 +13,41 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  /**
-   * Maneja el inicio de sesión con Firebase.
-   * Captura errores de Firebase y muestra mensajes legibles.
-   */
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      if (user.rol === 'admin') {
+        navigate('/dashboard');
+      } else {
+        navigate('/');
+      }
+    }
+  }, [isAuthenticated, user, navigate]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      await login(email, password);
-      navigate('/dashboard');
+      const success = await login(email, password);
+      if (!success) {
+        setError('Credenciales incorrectas. Verifica tu email y contraseña.');
+      }
     } catch (err: any) {
-      setError(err.message || 'Error al iniciar sesión.');
+      const errorCode = err.code;
+      if (errorCode === 'auth/user-not-found') {
+        setError('No existe una cuenta con este correo.');
+      } else if (errorCode === 'auth/wrong-password') {
+        setError('Contraseña incorrecta.');
+      } else if (errorCode === 'auth/invalid-email') {
+        setError('Formato de correo inválido.');
+      } else if (errorCode === 'auth/too-many-requests') {
+        setError('Demasiados intentos fallidos. Intenta más tarde.');
+      } else {
+        setError('Ocurrió un error al iniciar sesión.');
+      }
     } finally {
       setLoading(false);
     }
@@ -76,7 +95,7 @@ export default function LoginPage() {
                   <input
                     type="password"
                     className="form-control form-control-sm rounded-3"
-                    placeholder="123456"
+                    placeholder="••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -92,6 +111,19 @@ export default function LoginPage() {
                   {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
                 </button>
               </form>
+
+              <div className="mt-2 text-center">
+                <Link to="/register" className="btn btn-link btn-sm p-0">
+                  ¿No tienes cuenta? Regístrate aquí
+                </Link>
+              </div>
+
+              <div className="mt-2 text-center">
+                <small className="text-muted">
+                  <strong>Credenciales de prueba:</strong><br />
+                  Usa un usuario creado en Firebase Authentication.
+                </small>
+              </div>
             </div>
           </div>
         </div>

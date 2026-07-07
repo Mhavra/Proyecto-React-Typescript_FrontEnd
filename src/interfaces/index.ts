@@ -8,15 +8,12 @@ export interface Usuario {
   id: string;
   nombre: string;
   email: string;
-  password: string;
+  password?: string;
   rol: 'admin' | 'cliente';
 }
 
-/**
- * PRODUCTO - Representa un producto de la tienda
- */
 export interface Producto {
-  id: number;
+  id: string;
   nombre: string;
   categoria: string;
   precio: number;
@@ -25,9 +22,6 @@ export interface Producto {
   stock?: number;
 }
 
-/**
- * PEDIDO - Representa un pedido realizado por un cliente
- */
 export interface Pedido {
   id: string;
   cliente: string;
@@ -35,14 +29,16 @@ export interface Pedido {
   direccion?: string;
   telefono?: string;
   fecha: string;
-  productos: { id: string | number; cantidad: number; precio: number }[];
+  productos: {
+    id: string;
+    nombre: string;  //  Campo obligatorio
+    cantidad: number;
+    precio: number;
+  }[];
   total: number;
   estado: 'pendiente' | 'enviado' | 'entregado';
 }
 
-/**
- * CONSULTA - Representa una consulta de servicio al cliente
- */
 export interface Consulta {
   id: string;
   nombre: string;
@@ -55,12 +51,9 @@ export interface Consulta {
   respuesta?: string;
 }
 
-/**
- * AUTH CONTEXT TYPE - Tipo del contexto de autenticación
- */
 export interface AuthContextType {
   user: Usuario | null;
   login: (email: string, password: string) => Promise<boolean>;
-  logout: () => void;
+  logout: () => Promise<void>;
   isAuthenticated: boolean;
 }

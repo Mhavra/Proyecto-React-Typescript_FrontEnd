@@ -1,34 +1,52 @@
-// src/context/AuthContext.tsx
-// Contexto de autenticación con Firebase Authentication.
-// Reemplaza el login simulado de la ES3.
-
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { auth } from '@/firebase/config';
+import { auth } from '@/lib/firebase';
 import {
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
-  User,
-  AuthError,
+  User as FirebaseUser,
 } from 'firebase/auth';
+import { getDocument, setDocument } from '@/services/firestoreService';  //  Importamos setDocument
 import { Usuario, AuthContextType } from '@/interfaces';
-import { storage, STORAGE_KEYS } from '@/services/localStorageService';
 
-/**
- * Convierte un usuario de Firebase a nuestro tipo Usuario.
- * - El ID de Firebase (uid) lo usamos como identificador único,
- *   pero el rol y nombre se toman de localStorage (usuarios predefinidos).
- */
-const mapFirebaseUser = (user: User): Usuario => {
-  return {
-    id: Number(user.uid) || 999, // Fallback por si no se puede convertir
-    nombre: user.displayName || user.email?.split('@')[0] || 'Usuario',
-    email: user.email || '',
-    password: '',
-    rol: 'cliente', // Por defecto, hasta que carguemos el rol desde localStorage
+// Función para obtener o crear usuario en Firestore
+const getOrCreateUsuario = async (firebaseUser: FirebaseUser): Promise<Usuario> => {
+  const uid = firebaseUser.uid;
+  
+  // 1. Intentar obtener de Firestore
+  let userDoc = await getDocument<Usuario>('usuario', uid);
+  
+  // 2. Si existe, devolverlo
+  if (userDoc) {
+    console.log('✅ Usuario encontrado en Firestore:', userDoc);
+    return userDoc;
+  }
+  
+  // 3. Si no existe, CREARLO automáticamente
+  console.log('🆕 Usuario no encontrado en Firestore. Creando...');
+  
+  const nombre = firebaseUser.displayName || 
+                 firebaseUser.email?.split('@')[0] || 
+                 'Usuario';
+  
+  const nuevoUsuario: Omit<Usuario, 'id'> = {
+    nombre: nombre,
+    email: firebaseUser.email || '',
+    rol: 'cliente',
   };
+  
+  // Guardar en Firestore con el UID como ID del documento
+  await setDocument('usuario', uid, nuevoUsuario);
+  
+  const usuarioCreado: Usuario = {
+    id: uid,
+    ...nuevoUsuario,
+  };
+  
+  console.log('✅ Usuario creado en Firestore:', usuarioCreado);
+  return usuarioCreado;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -38,23 +56,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  /**
-   * onAuthStateChanged: Mantiene la sesión activa entre recargas.
-   * Escucha cambios en el estado de autenticación de Firebase.
-   */
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        const mappedUser = mapFirebaseUser(firebaseUser);
-        // Buscar el usuario en localStorage para obtener su rol y nombre completo
-        const storedUsers = storage.get<Usuario>(STORAGE_KEYS.USUARIOS);
-        const storedUser = storedUsers.find((u) => u.email === mappedUser.email);
-        if (storedUser) {
-          mappedUser.rol = storedUser.rol;
-          mappedUser.nombre = storedUser.nombre;
-          mappedUser.id = storedUser.id;
-        }
-        setUser(mappedUser);
+        // Obtener o crear el usuario en Firestore
+        const userData = await getOrCreateUsuario(firebaseUser);
+        setUser(userData);
         setIsAuthenticated(true);
       } else {
         setUser(null);
@@ -65,44 +72,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  /**
-   * Inicio de sesión con Firebase Authentication.
-   * Usa signInWithEmailAndPassword y maneja errores con mensajes amigables.
-   */
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userData = await getOrCreateUsuario(userCredential.user);
+      setUser(userData);
+      setIsAuthenticated(true);
+      console.log('🔐 Login exitoso, usuario:', userData);
       return true;
     } catch (error) {
-      const firebaseError = error as AuthError;
-      let message = 'Error al iniciar sesión.';
-      switch (firebaseError.code) {
-        case 'auth/user-not-found':
-          message = 'No hay usuario con este correo.';
-          break;
-        case 'auth/wrong-password':
-          message = 'Contraseña incorrecta.';
-          break;
-        case 'auth/too-many-requests':
-          message = 'Demasiados intentos. Intenta más tarde.';
-          break;
-        default:
-          message = firebaseError.message;
-      }
-      throw new Error(message);
+      console.error('Login error:', error);
+      return false;
     }
   };
 
-  /**
-   * Cierre de sesión con Firebase Authentication.
-   * Usa signOut y limpia el estado local.
-   */
-  const logout = async () => {
+  const logout = async (): Promise<void> => {
     await signOut(auth);
     setUser(null);
     setIsAuthenticated(false);
-    // Limpiar sesión en localStorage (por si quedó algo)
-    storage.setItem(STORAGE_KEYS.SESSION, []);
   };
 
   if (loading) {
@@ -118,6 +105,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth debe usarse dentro de AuthProvider');
+  if (!context) {
+    throw new Error('useAuth must be used within AuthProvider');
+  }
   return context;
 }

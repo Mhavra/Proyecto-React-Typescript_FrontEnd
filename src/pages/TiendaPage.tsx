@@ -4,63 +4,49 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '@/components/common/Header';
 import Footer from '@/components/common/Footer';
-import { storage, STORAGE_KEYS } from '@/services/localStorageService';
+import { getCollection } from '@/services/firestoreService';
 import { Producto } from '@/interfaces';
 
-/**
- * TIENDA PAGE - Página principal de la tienda
- * 
- * Muestra:
- * - Hero banner con imagen de fondo
- * - Productos vintage (primeros 4 con stock)
- * - Nuevos productos (primeros 4 con stock)
- * - Botón para ver más productos
- * - Sección de promociones (3 bloques)
- * 
- * @page /
- */
 export default function TiendaPage() {
-  // Estados para productos vintage y nuevos
   const [vintageProducts, setVintageProducts] = useState<Producto[]>([]);
   const [nuevosProducts, setNuevosProducts] = useState<Producto[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  /**
-   * Carga productos desde localStorage al montar el componente
-   * Filtra por categoría y solo muestra productos con stock > 0
-   * Toma solo los primeros 4 de cada categoría
-   */
   useEffect(() => {
-    const all = storage.get<Producto>(STORAGE_KEYS.PRODUCTOS);
-    // Filtrar productos con stock > 0 y stock no undefined
-    const vintage = all.filter(p => 
-      p.categoria?.toLowerCase() === 'vintage' && 
-      (p.stock !== undefined && p.stock > 0)
-    );
-    const nuevos = all.filter(p => 
-      p.categoria?.toLowerCase() === 'nuevos' && 
-      (p.stock !== undefined && p.stock > 0)
-    );
-    setVintageProducts(vintage.slice(0, 4));
-    setNuevosProducts(nuevos.slice(0, 4));
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const all = await getCollection<Producto>('productos');
+        const vintage = all.filter(p =>
+          p.categoria?.toLowerCase() === 'vintage' &&
+          (p.stock !== undefined && p.stock > 0)
+        );
+        const nuevos = all.filter(p =>
+          p.categoria?.toLowerCase() === 'nuevos' &&
+          (p.stock !== undefined && p.stock > 0)
+        );
+        setVintageProducts(vintage.slice(0, 4));
+        setNuevosProducts(nuevos.slice(0, 4));
+        setError('');
+      } catch (err) {
+        setError('Error al cargar productos');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
   }, []);
 
-  /**
-   * Agrega un producto al carrito
-   * Solo permite agregar si hay stock disponible
-   * @param prod - Producto a agregar
-   */
   const handleAddToCart = (prod: Producto) => {
-    // Verificar si hay stock disponible (manejando undefined)
     const stockDisponible = prod.stock !== undefined ? prod.stock : 0;
     if (stockDisponible <= 0) {
       alert('No hay stock disponible de este producto.');
       return;
     }
-
     const cart = JSON.parse(localStorage.getItem('frenesiCarrito') || '[]');
-    const existing = cart.find((item: any) => String(item.id) === String(prod.id));
-    
-    // Si el producto ya está en el carrito, verificar que no supere el stock
+    const existing = cart.find((item: any) => item.id === prod.id);
     if (existing) {
       if (existing.cantidad >= stockDisponible) {
         alert(`Solo hay ${stockDisponible} unidades disponibles.`);
@@ -70,31 +56,12 @@ export default function TiendaPage() {
     } else {
       cart.push({ id: prod.id, nombre: prod.nombre, precio: prod.precio, cantidad: 1 });
     }
-    
     localStorage.setItem('frenesiCarrito', JSON.stringify(cart));
     window.dispatchEvent(new Event('storage'));
   };
 
-  /**
-   * Obtiene el stock de forma segura (maneja undefined)
-   */
-  const getStock = (prod: Producto): number => {
-    return prod.stock !== undefined ? prod.stock : 0;
-  };
+  const getStock = (prod: Producto): number => prod.stock !== undefined ? prod.stock : 0;
 
-  /**
-   * Verifica si un producto tiene stock
-   */
-  const hasStock = (prod: Producto): boolean => {
-    return getStock(prod) > 0;
-  };
-
-  /**
-   * Renderiza un grid de productos
-   * @param products - Lista de productos a mostrar
-   * @param title - Título de la sección
-   * @param subtitle - Subtítulo de la sección
-   */
   const renderProductGrid = (products: Producto[], title: string, subtitle: string) => {
     if (products.length === 0) return null;
     return (
@@ -107,29 +74,21 @@ export default function TiendaPage() {
           {products.map(prod => {
             const stock = getStock(prod);
             const inStock = stock > 0;
-            
             return (
               <div key={prod.id} className="col-6 col-md-3">
                 <div className="card border-0 h-100 position-relative">
-                  {/* Overlay "Sin stock" - se muestra si el stock es 0 */}
                   {!inStock && (
                     <div className="position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex align-items-center justify-content-center" style={{ zIndex: 10, borderRadius: '8px' }}>
                       <span className="text-white fw-bold fs-4">Sin stock</span>
                     </div>
                   )}
                   <div className="card-img-top">
-                    <img
-                      src={prod.imagen}
-                      alt={prod.nombre}
-                      style={{ width: '100%', aspectRatio: '1/1', objectFit: 'contain' }}
-                    />
+                    <img src={prod.imagen} alt={prod.nombre} style={{ width: '100%', aspectRatio: '1/1', objectFit: 'contain' }} />
                   </div>
                   <div className="card-body p-0 mt-3 text-center">
                     <div className="product-title">{prod.nombre}</div>
                     <div className="product-price">${prod.precio}</div>
-                    <div className="small text-muted">
-                      {inStock ? `Stock: ${stock}` : 'Sin stock'}
-                    </div>
+                    <div className="small text-muted">{inStock ? `Stock: ${stock}` : 'Sin stock'}</div>
                     <button
                       className={`btn w-100 mt-2 ${inStock ? 'btn-add-cart' : 'btn-secondary'}`}
                       onClick={() => handleAddToCart(prod)}
@@ -147,11 +106,34 @@ export default function TiendaPage() {
     );
   };
 
+  if (loading) {
+    return (
+      <>
+        <Header />
+        <main className="main">
+          <div className="text-center py-5">Cargando tienda...</div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <>
+        <Header />
+        <main className="main">
+          <div className="alert alert-danger">{error}</div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
   return (
     <>
       <Header />
       <main className="main">
-        {/* Hero banner */}
         <div className="seccion-slice-1 position-relative" style={{ minHeight: '80vh' }}>
           <div
             id="hero-image"
@@ -167,20 +149,15 @@ export default function TiendaPage() {
           </section>
         </div>
 
-        {/* Sección Vintage */}
         {renderProductGrid(vintageProducts, 'Vintage', 'Revive tus recuerdos')}
-
-        {/* Sección Nuevos Productos */}
         {renderProductGrid(nuevosProducts, 'Nuevos Productos', 'Productos recién agregados')}
 
-        {/* Botón Ver más */}
         <div className="container text-center mt-0 mb-4">
           <Link to="/novedades" className="btn btn-ver-mas px-5 py-3">
             Ver más productos
           </Link>
         </div>
 
-        {/* Sección de promociones (3 bloques) */}
         <section className="container-fluid px-1 promo-section px-0 pb-2">
           <div className="row g-1">
             <div className="col-md-4">
