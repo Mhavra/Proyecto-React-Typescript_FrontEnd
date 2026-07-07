@@ -1,3 +1,7 @@
+// src/pages/LoginPage.tsx
+// Página de login con Firebase Authentication.
+// Los errores de Firebase se muestran al usuario de forma comprensible.
+
 'use client';
 
 import { useState, useEffect } from 'react';

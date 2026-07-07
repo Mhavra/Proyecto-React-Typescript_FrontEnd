@@ -1,6 +1,6 @@
 # Proyecto-React-Typescript_FrontEnd
 
-*Contexto para la tercera etapa (Intranet React + TypeScript)*
+## Contexto para la tercera etapa (Intranet React + TypeScript)
 Frenesí Papelería necesita una herramienta de gestión interna que permita a la dueña administrar el inventario, procesar pedidos, atender consultas y gestionar usuarios de forma centralizada y ágil. Actualmente, estas tareas se realizan manualmente (revisión de mensajes, actualización de stock en archivos externos), lo que genera demoras, errores y sobrecarga de trabajo. La intranet propuesta automatizará estos procesos y dará trazabilidad a las operaciones del negocio, conectando directamente con los datos generados por el sitio web público (carrito de compras y formulario de contacto).
 
 Necesidad digital identificada
@@ -15,10 +15,9 @@ La dueña necesita una plataforma que le permita:
 
 -Administrar los usuarios internos que tendrán acceso al sistema.
 
--Tener un dashboard con indicadores clave (productos totales, pedidos pendientes, consultas no leídas).
+-Tener un dashboard con indicadores clave (productos totales, pedidos pendientes, consultas no leídas y cantidad de usuarios).
 
 -Todo esto en una interfaz protegida por login, con persistencia de datos y navegación fluida.
-
 
 Cambios y mejoras respecto a la segunda etapa
 ----
@@ -34,26 +33,64 @@ Cambios y mejoras respecto a la segunda etapa
 
 -Dashboard y estadísticas: Se añade una página de inicio con resumen de métricas (productos, pedidos, consultas, usuarios) para una visión rápida del negocio.
 
--Diseño consistente y modo oscuro: Se conserva la identidad visual de Frenesí (colores, iconos) y el modo oscuro/claro implementado en la ES2, ahora gestionado desde React con localStorage.
+-Diseño consistente y modo oscuro: Se conserva la identidad visual de Frenesí (colores, iconos) y el modo oscuro/claro implementado en la ES2, ahora gestionado desde Firebase.
 
-Inicializar el proyecto
-----------
-En CMD, la carpeta del proyecto raiz:
--npm install / yarn install
--npm run dev / yarn dev
--npm install @popperjs/core 
+## Tecnologías Utilizadas
 
-Listado de secciones que tendrá el sitio web.
---------------------------
--Inicio
+- **React 18** con **TypeScript**: Para construir una interfaz de usuario robusta y tipada.
+- **React Router DOM**: Para la navegación sin recarga de página (SPA).
+- **Bootstrap 5**: Para los estilos y componentes visuales.
+- **Firebase Authentication** (login real)
+- **Firestore** (base de datos en tiempo real)
+- **Context API** (autenticación global)
+
+## Listado de secciones que tendrá el sitio web.
+
+-Inicio/Tienda
+
 -Nosotros
+
 -Novedades
+
 -Carrito
+
 -Correo ayuda
+
 -Panel de administrador
 
-Integrantes del grupo con sus respectivos roles.
-------------------------------------
+## Integrantes del grupo.
+
 -Nayaret Larrondo
+
 -Fram Salinas
+
 -Nilson Oyarce
+
+## Instalación y Ejecución Local
+
+Para ejecutar el proyecto en tu máquina local, sigue estos pasos:
+
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/Mhavra/Proyecto-React-Typescript_FrontEnd.git
+
+# 2. Navegar al directorio del proyecto
+cd Proyecto-React-Typescript_FrontEnd
+
+# 3. Instalar las dependencias
+npm install  / yarn install
+npm config set legacy-peer-deps true
+npm install firebase
+# 4. Instalar dependencias adicionales para Bootstrap, por si lo pide
+npm install @popperjs/core 
+
+# 5. Ejecutar el servidor de desarrollo
+npm run dev
+
+## 🔥 Configuración de Firebase
+
+1. Crea un proyecto en [Firebase Console](https://console.firebase.google.com/).
+2. Habilita **Authentication** (método Email/Password).
+3. Crea una base de datos **Firestore** en modo de prueba.
+4. Obtén las credenciales de tu app (Configuración del proyecto > Tus apps > Configuración del SDK).
+5. Crea un archivo `.env` en la raíz con las siguientes variables:

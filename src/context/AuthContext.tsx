@@ -8,7 +8,7 @@ import {
   onAuthStateChanged,
   User as FirebaseUser,
 } from 'firebase/auth';
-import { getDocument, setDocument } from '@/services/firestoreService';  // 🔥 Importamos setDocument
+import { getDocument, setDocument } from '@/services/firestoreService';  //  Importamos setDocument
 import { Usuario, AuthContextType } from '@/interfaces';
 
 // Función para obtener o crear usuario en Firestore

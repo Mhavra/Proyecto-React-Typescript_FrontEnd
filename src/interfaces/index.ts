@@ -1,3 +1,9 @@
+// src/interfaces/index.ts
+// Se mantienen los IDs como number para compatibilidad con la ES3.
+// Firestore genera IDs string, pero los convertimos a number al leer.
+/**
+ * USUARIO - Representa un usuario del sistema
+ */
 export interface Usuario {
   id: string;
   nombre: string;
