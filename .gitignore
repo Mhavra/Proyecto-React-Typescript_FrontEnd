@@ -82,4 +82,10 @@ __pycache__/
 # Archivos de configuración de Firebase (si usas)
 .env
 .env.local
-.env*.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# Permitir .env.example (SÍ se sube)
+!.env.example
