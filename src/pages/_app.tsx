@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from '@/context/AuthContext';
 import PrivateRoute from '@/components/common/PrivateRoute';
 import AdminLayout from '@/components/common/Layout';
 import LoginPage from '@/pages/LoginPage';
+import RegisterPage from '@/pages/RegisterPage';  // 🔥 NUEVO
 import TiendaPage from '@/pages/TiendaPage';
 import NovedadesPage from '@/pages/NovedadesPage';
 import ServicioClientePage from '@/pages/ServicioClientePage';
@@ -31,6 +32,7 @@ function AppRoutes() {
       <Route path="/carrito" element={<CarritoPage />} />
       <Route path="/acerca-de-nosotros" element={<AcercaDeNosotrosPage />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />  {/* 🔥 NUEVA RUTA */}
 
       {/* Rutas privadas (solo admin) */}
       <Route

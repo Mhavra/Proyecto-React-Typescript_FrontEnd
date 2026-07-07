@@ -1,7 +1,7 @@
-// src/pages/CarritoPage.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { getCollection, addDocument, updateDocument } from '@/services/firestoreService';
 import { Producto, Pedido } from '@/interfaces';
@@ -17,6 +17,7 @@ interface CartItem {
 
 export default function CarritoPage() {
   const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [total, setTotal] = useState(0);
   const [name, setName] = useState('');
@@ -28,7 +29,6 @@ export default function CarritoPage() {
   const [productos, setProductos] = useState<Producto[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Cargar productos desde Firestore para verificar stock
   useEffect(() => {
     const fetchProductos = async () => {
       try {
@@ -96,7 +96,6 @@ export default function CarritoPage() {
   const validateName = (value: string): string => {
     if (!value.trim()) return 'El nombre es obligatorio.';
     if (value.trim().length < 3) return 'El nombre debe tener al menos 3 caracteres.';
-    if (value.trim().length > 80) return 'El nombre no puede tener más de 80 caracteres.';
     if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(value.trim())) {
       return 'El nombre solo puede contener letras y espacios.';
     }
@@ -104,15 +103,15 @@ export default function CarritoPage() {
   };
 
   const validateEmail = (value: string): string => {
-    if (!value.trim()) return 'El correo electrónico es obligatorio.';
+    if (!value.trim()) return 'El correo es obligatorio.';
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(value.trim())) {
-      return 'Ingresa un correo válido (ejemplo: usuario@gmail.com).';
+      return 'Ingresa un correo válido (ej: usuario@gmail.com).';
     }
     const parts = value.trim().split('@');
     if (parts.length === 2) {
       if (/^\d+$/.test(parts[0])) return 'El nombre del correo no puede ser solo números.';
-      if (/\d/.test(parts[1])) return 'El dominio del correo no puede contener números después del @.';
+      if (/\d/.test(parts[1])) return 'El dominio del correo no puede contener números.';
     }
     return '';
   };
@@ -120,8 +119,8 @@ export default function CarritoPage() {
   const validateDireccion = (value: string): string => {
     if (!value.trim()) return 'La dirección es obligatoria.';
     if (value.trim().length < 5) return 'La dirección debe tener al menos 5 caracteres.';
-    if (!/[a-zA-Z]/.test(value.trim())) return 'La dirección debe contener al menos una palabra (letras).';
-    if (!/\d/.test(value.trim())) return 'La dirección debe contener al menos un número (ej: Calle 123).';
+    if (!/[a-zA-Z]/.test(value.trim())) return 'La dirección debe contener al menos una palabra.';
+    if (!/\d/.test(value.trim())) return 'La dirección debe contener al menos un número.';
     return '';
   };
 
@@ -174,6 +173,13 @@ export default function CarritoPage() {
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!isAuthenticated) {
+      setMessage('⚠️ Debes iniciar sesión para realizar un pedido.');
+      setTimeout(() => navigate('/login'), 2000);
+      return;
+    }
+
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
@@ -188,11 +194,9 @@ export default function CarritoPage() {
 
     setLoading(true);
     try {
-      // Verificar stock actualizado
       const productosActualizados = await getCollection<Producto>('productos');
       setProductos(productosActualizados);
       
-      // Verificar cada item
       for (const item of cart) {
         const prod = productosActualizados.find(p => p.id === item.id);
         if (!prod) {
@@ -208,7 +212,6 @@ export default function CarritoPage() {
         }
       }
 
-      // Descontar stock
       for (const item of cart) {
         const prod = productosActualizados.find(p => p.id === item.id);
         if (prod) {
@@ -217,7 +220,7 @@ export default function CarritoPage() {
         }
       }
 
-      // Crear pedido en Firestore
+      // 🔥 Crear pedido con nombre de producto
       const pedido: Omit<Pedido, 'id'> = {
         cliente: name.trim(),
         email: email.trim(),
@@ -226,6 +229,7 @@ export default function CarritoPage() {
         fecha: new Date().toLocaleDateString('es-CL'),
         productos: cart.map(item => ({
           id: item.id,
+          nombre: item.nombre,   // 🔥 Guardamos el nombre
           cantidad: item.cantidad,
           precio: item.precio
         })),
@@ -233,9 +237,10 @@ export default function CarritoPage() {
         estado: 'pendiente'
       };
 
+      console.log('📦 Pedido a guardar:', pedido);
+
       await addDocument<Pedido>('pedidos', pedido);
 
-      // Vaciar carrito
       localStorage.setItem('frenesiCarrito', JSON.stringify([]));
       setCart([]);
       setTotal(0);
@@ -243,14 +248,8 @@ export default function CarritoPage() {
 
       setMessage('¡Gracias por tu pedido! Pronto nos pondremos en contacto.');
       setErrors({});
-      if (!isAuthenticated) {
-        setName('');
-        setEmail('');
-        setDireccion('');
-        setTelefono('');
-      }
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      console.error('Error en checkout:', err);
       setMessage('Ocurrió un error al procesar el pedido.');
     } finally {
       setLoading(false);
@@ -324,10 +323,15 @@ export default function CarritoPage() {
           {cart.length > 0 && (
             <section className="checkout-form p-4 rounded-3 shadow-sm bg-white">
               <h2 className="mb-3">Finalizar compra</h2>
-              {isAuthenticated && user && (
+              {isAuthenticated && user ? (
                 <div className="alert alert-info mb-3">
                   <i className="bi bi-info-circle me-2"></i>
                   Estás realizando el pedido como <strong>{user.nombre}</strong> ({user.email}).
+                </div>
+              ) : (
+                <div className="alert alert-warning mb-3">
+                  <i className="bi bi-exclamation-triangle me-2"></i>
+                  Debes <span className="fw-bold text-primary" style={{ cursor: 'pointer' }} onClick={() => navigate('/login')}>iniciar sesión</span> para realizar un pedido.
                 </div>
               )}
 
@@ -342,7 +346,7 @@ export default function CarritoPage() {
                     value={name}
                     onChange={(e) => handleNameChange(e.target.value)}
                     maxLength={80}
-                    disabled={isAuthenticated && !!user}
+                    disabled={!isAuthenticated}
                   />
                   {errors.name && <div className="form-error">{errors.name}</div>}
                 </div>
@@ -356,7 +360,7 @@ export default function CarritoPage() {
                     placeholder="Ej: usuario@gmail.com"
                     value={email}
                     onChange={(e) => handleEmailChange(e.target.value)}
-                    disabled={isAuthenticated && !!user}
+                    disabled={!isAuthenticated}
                   />
                   {errors.email && <div className="form-error">{errors.email}</div>}
                 </div>
@@ -387,7 +391,7 @@ export default function CarritoPage() {
                   {errors.telefono && <div className="form-error">{errors.telefono}</div>}
                 </div>
 
-                <button type="submit" className="btn btn-add-cart w-100" disabled={loading}>
+                <button type="submit" className="btn btn-add-cart w-100" disabled={loading || !isAuthenticated}>
                   {loading ? 'Procesando...' : 'Realizar pedido'}
                 </button>
               </form>

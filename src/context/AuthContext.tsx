@@ -1,4 +1,3 @@
-// src/context/AuthContext.tsx
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
@@ -9,23 +8,45 @@ import {
   onAuthStateChanged,
   User as FirebaseUser,
 } from 'firebase/auth';
-import { getDocument } from '@/services/firestoreService';
+import { getDocument, setDocument } from '@/services/firestoreService';  // 🔥 Importamos setDocument
 import { Usuario, AuthContextType } from '@/interfaces';
 
-const getUsuarioFromFirestore = async (uid: string): Promise<Usuario | null> => {
-  try {
-    // 🔥 Ahora busca en la colección 'usuario' (singular) porque así está en Firestore
-    const userDoc = await getDocument<Usuario>('usuario', uid);
-    if (userDoc) {
-      console.log('✅ Usuario encontrado en Firestore:', userDoc);
-      return userDoc;
-    }
-    console.warn('⚠️ No se encontró documento en Firestore para UID:', uid);
-    return null;
-  } catch (error) {
-    console.error('Error al obtener usuario de Firestore:', error);
-    return null;
+// Función para obtener o crear usuario en Firestore
+const getOrCreateUsuario = async (firebaseUser: FirebaseUser): Promise<Usuario> => {
+  const uid = firebaseUser.uid;
+  
+  // 1. Intentar obtener de Firestore
+  let userDoc = await getDocument<Usuario>('usuario', uid);
+  
+  // 2. Si existe, devolverlo
+  if (userDoc) {
+    console.log('✅ Usuario encontrado en Firestore:', userDoc);
+    return userDoc;
   }
+  
+  // 3. Si no existe, CREARLO automáticamente
+  console.log('🆕 Usuario no encontrado en Firestore. Creando...');
+  
+  const nombre = firebaseUser.displayName || 
+                 firebaseUser.email?.split('@')[0] || 
+                 'Usuario';
+  
+  const nuevoUsuario: Omit<Usuario, 'id'> = {
+    nombre: nombre,
+    email: firebaseUser.email || '',
+    rol: 'cliente',
+  };
+  
+  // Guardar en Firestore con el UID como ID del documento
+  await setDocument('usuario', uid, nuevoUsuario);
+  
+  const usuarioCreado: Usuario = {
+    id: uid,
+    ...nuevoUsuario,
+  };
+  
+  console.log('✅ Usuario creado en Firestore:', usuarioCreado);
+  return usuarioCreado;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -35,28 +56,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const mapFirebaseUser = async (firebaseUser: FirebaseUser | null): Promise<Usuario | null> => {
-    if (!firebaseUser) return null;
-    
-    let userData = await getUsuarioFromFirestore(firebaseUser.uid);
-    
-    if (!userData) {
-      console.log('🆕 Creando usuario por defecto (cliente) para:', firebaseUser.email);
-      userData = {
-        id: firebaseUser.uid,
-        nombre: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Usuario',
-        email: firebaseUser.email || '',
-        rol: 'cliente',
-      };
-    }
-    return userData;
-  };
-
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      const mapped = await mapFirebaseUser(firebaseUser);
-      setUser(mapped);
-      setIsAuthenticated(!!mapped);
+      if (firebaseUser) {
+        // Obtener o crear el usuario en Firestore
+        const userData = await getOrCreateUsuario(firebaseUser);
+        setUser(userData);
+        setIsAuthenticated(true);
+      } else {
+        setUser(null);
+        setIsAuthenticated(false);
+      }
       setLoading(false);
     });
     return () => unsubscribe();
@@ -65,10 +75,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const mapped = await mapFirebaseUser(userCredential.user);
-      setUser(mapped);
+      const userData = await getOrCreateUsuario(userCredential.user);
+      setUser(userData);
       setIsAuthenticated(true);
-      console.log('🔐 Login exitoso, usuario:', mapped);
+      console.log('🔐 Login exitoso, usuario:', userData);
       return true;
     } catch (error) {
       console.error('Login error:', error);

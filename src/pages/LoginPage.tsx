@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 
 export default function LoginPage() {
@@ -14,13 +14,9 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      console.log('👤 Usuario autenticado:', user);
-      console.log('🎯 Rol del usuario:', user.rol);
       if (user.rol === 'admin') {
-        console.log('🚀 Redirigiendo a /dashboard');
         navigate('/dashboard');
       } else {
-        console.log('🚀 Redirigiendo a / (cliente)');
         navigate('/');
       }
     }
@@ -111,6 +107,12 @@ export default function LoginPage() {
                   {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
                 </button>
               </form>
+
+              <div className="mt-2 text-center">
+                <Link to="/register" className="btn btn-link btn-sm p-0">
+                  ¿No tienes cuenta? Regístrate aquí
+                </Link>
+              </div>
 
               <div className="mt-2 text-center">
                 <small className="text-muted">

@@ -1,4 +1,3 @@
-// src/pages/TiendaPage.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -17,6 +16,7 @@ export default function TiendaPage() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
+        setLoading(true);
         const all = await getCollection<Producto>('productos');
         const vintage = all.filter(p =>
           p.categoria?.toLowerCase() === 'vintage' &&
@@ -28,6 +28,7 @@ export default function TiendaPage() {
         );
         setVintageProducts(vintage.slice(0, 4));
         setNuevosProducts(nuevos.slice(0, 4));
+        setError('');
       } catch (err) {
         setError('Error al cargar productos');
         console.error(err);
@@ -105,8 +106,29 @@ export default function TiendaPage() {
     );
   };
 
-  if (loading) return <div className="text-center py-5">Cargando tienda...</div>;
-  if (error) return <div className="alert alert-danger">{error}</div>;
+  if (loading) {
+    return (
+      <>
+        <Header />
+        <main className="main">
+          <div className="text-center py-5">Cargando tienda...</div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <>
+        <Header />
+        <main className="main">
+          <div className="alert alert-danger">{error}</div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <>

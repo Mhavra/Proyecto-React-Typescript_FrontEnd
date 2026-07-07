@@ -1,4 +1,3 @@
-// src/pages/NovedadesPage.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -22,9 +21,11 @@ export default function NovedadesPage() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
+        setLoading(true);
         const prods = await getCollection<Producto>('productos');
         setAllProducts(prods);
         setFiltered(prods);
+        setError('');
       } catch (err) {
         setError('Error al cargar productos');
         console.error(err);
@@ -36,10 +37,10 @@ export default function NovedadesPage() {
   }, []);
 
   useEffect(() => {
-    if (initialSearch) {
+    if (initialSearch && allProducts.length > 0) {
       handleSearch(initialSearch);
     }
-  }, [initialSearch]);
+  }, [initialSearch, allProducts]);
 
   const handleSearch = (term: string) => {
     const normalized = term
@@ -71,8 +72,29 @@ export default function NovedadesPage() {
 
   const getStock = (prod: Producto): number => prod.stock !== undefined ? prod.stock : 0;
 
-  if (loading) return <div className="text-center py-5">Cargando productos...</div>;
-  if (error) return <div className="alert alert-danger">{error}</div>;
+  if (loading) {
+    return (
+      <>
+        <Header />
+        <main className="main">
+          <div className="text-center py-5">Cargando productos...</div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <>
+        <Header />
+        <main className="main">
+          <div className="alert alert-danger">{error}</div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <>

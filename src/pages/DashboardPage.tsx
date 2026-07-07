@@ -1,4 +1,3 @@
-// src/pages/DashboardPage.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -43,7 +42,7 @@ export default function DashboardPage() {
           getCollection<Producto>('productos'),
           getCollection<Pedido>('pedidos'),
           getCollection<Consulta>('consultas'),
-          getCollection('usuarios'), // No tipamos, solo usamos length
+          getCollection('usuario'),
         ]);
 
         setStats({
@@ -52,9 +51,10 @@ export default function DashboardPage() {
           consultasNoLeidas: consultas.filter(c => c.estado === 'no_leida').length,
           usuarios: usuarios.length,
         });
-      } catch (err) {
-        setError('Error al cargar estadísticas');
-        console.error(err);
+        setError('');
+      } catch (err: any) {
+        console.error('Error al cargar estadísticas:', err);
+        setError('Error al cargar estadísticas. Verifica tus permisos en Firestore.');
       } finally {
         setLoading(false);
       }
@@ -63,11 +63,11 @@ export default function DashboardPage() {
   }, []);
 
   if (loading) return <div className="text-center py-5">Cargando estadísticas...</div>;
-  if (error) return <div className="alert alert-danger">{error}</div>;
 
   return (
     <div>
       <h4 className="fw-bold mb-4">Dashboard</h4>
+      {error && <div className="alert alert-danger">{error}</div>}
       <div className="row g-3 mb-4">
         <StatCard
           title="Productos"

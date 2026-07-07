@@ -1,25 +1,29 @@
-// src/pages/UsuariosPage.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/context/AuthContext';
 import { getCollection, addDocument, updateDocument, deleteDocument } from '@/services/firestoreService';
+import { auth } from '@/lib/firebase';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { Usuario } from '@/interfaces';
 import SearchBar from '@/components/common/SearchBar';
 import UsuarioList from '@/components/usuarios/UserList';
 import UsuarioForm from '@/components/usuarios/UserForm';
 
 export default function UsuariosPage() {
+  const { user: currentUser } = useAuth();
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState<Usuario | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
 
   const cargarUsuarios = async () => {
     try {
       setLoading(true);
-      const data = await getCollection<Usuario>('usuarios');
+      const data = await getCollection<Usuario>('usuario');
       setUsuarios(data);
       setError('');
     } catch (err) {
@@ -40,17 +44,46 @@ export default function UsuariosPage() {
   );
 
   const handleSave = async (usuario: Omit<Usuario, 'id'>) => {
+    setSaving(true);
+    setError('');
     try {
       if (editingUser) {
-        await updateDocument('usuarios', editingUser.id, usuario);
+        // Editar usuario existente (solo Firestore)
+        await updateDocument('usuario', editingUser.id, usuario);
+        await cargarUsuarios();
+        setShowForm(false);
+        setEditingUser(null);
       } else {
-        await addDocument('usuarios', usuario);
+        // 🔥 Crear usuario NUEVO: primero en Auth, luego en Firestore
+        const userCredential = await createUserWithEmailAndPassword(
+          auth,
+          usuario.email,
+          usuario.password || '123456' // Usar password por defecto si no se envía
+        );
+        const uid = userCredential.user.uid;
+        
+        // Guardar en Firestore con el UID como ID
+        const usuarioData = {
+          nombre: usuario.nombre,
+          email: usuario.email,
+          rol: usuario.rol || 'cliente',
+        };
+        await addDocument('usuario', usuarioData);
+        
+        // Recargar lista
+        await cargarUsuarios();
+        setShowForm(false);
+        setEditingUser(null);
       }
-      await cargarUsuarios();
-      setShowForm(false);
-      setEditingUser(null);
-    } catch (err) {
-      setError('Error al guardar usuario');
+    } catch (err: any) {
+      console.error('Error al guardar usuario:', err);
+      if (err.code === 'auth/email-already-in-use') {
+        setError('Este correo ya está registrado en Firebase Auth.');
+      } else {
+        setError('Error al guardar usuario: ' + (err.message || ''));
+      }
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -62,7 +95,7 @@ export default function UsuariosPage() {
   const handleDelete = async (id: string) => {
     if (confirm('¿Eliminar este usuario?')) {
       try {
-        await deleteDocument('usuarios', id);
+        await deleteDocument('usuario', id);
         await cargarUsuarios();
       } catch (err) {
         setError('Error al eliminar usuario');
@@ -84,6 +117,7 @@ export default function UsuariosPage() {
         <button
           className="btn" style={{ backgroundColor: '#6f42c1', color: 'white' }}
           onClick={() => setShowForm(true)}
+          disabled={saving}
         >
           <i className="bi bi-plus-circle me-1"></i>
           Nuevo Usuario
@@ -108,6 +142,7 @@ export default function UsuariosPage() {
               usuario={editingUser || undefined}
               onSave={handleSave}
               onCancel={handleCancel}
+              saving={saving}
             />
           </div>
         </div>

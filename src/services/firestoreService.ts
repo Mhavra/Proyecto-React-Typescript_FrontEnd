@@ -7,6 +7,7 @@ import {
   updateDoc,
   deleteDoc,
   getDoc,
+  setDoc,
 } from 'firebase/firestore';
 
 export const getCollection = async <T>(collectionName: string): Promise<T[]> => {
@@ -37,4 +38,12 @@ export const updateDocument = async <T>(collectionName: string, id: string, upda
 
 export const deleteDocument = async (collectionName: string, id: string): Promise<void> => {
   await deleteDoc(doc(db, collectionName, id));
+};
+
+export const setDocument = async <T>(
+  collectionName: string,
+  id: string,
+  data: Omit<T, 'id'>
+): Promise<void> => {
+  await setDoc(doc(db, collectionName, id), data);
 };

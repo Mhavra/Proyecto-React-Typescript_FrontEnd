@@ -23,7 +23,12 @@ export interface Pedido {
   direccion?: string;
   telefono?: string;
   fecha: string;
-  productos: { id: string; cantidad: number; precio: number }[];
+  productos: {
+    id: string;
+    nombre: string;  //  Campo obligatorio
+    cantidad: number;
+    precio: number;
+  }[];
   total: number;
   estado: 'pendiente' | 'enviado' | 'entregado';
 }

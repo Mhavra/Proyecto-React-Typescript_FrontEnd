@@ -1,9 +1,3 @@
-/**
- * USUARIO FORM - Formulario de usuarios
- * 
- * @component
- */
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -13,10 +7,10 @@ interface UsuarioFormProps {
   usuario?: Usuario;
   onSave: (usuario: Omit<Usuario, 'id'>) => void;
   onCancel: () => void;
+  saving?: boolean;
 }
 
-// Estado del formulario
-export default function UsuarioForm({ usuario, onSave, onCancel }: UsuarioFormProps) {
+export default function UsuarioForm({ usuario, onSave, onCancel, saving = false }: UsuarioFormProps) {
   const [formData, setFormData] = useState<Omit<Usuario, 'id'>>({
     nombre: '',
     email: '',
@@ -24,30 +18,22 @@ export default function UsuarioForm({ usuario, onSave, onCancel }: UsuarioFormPr
     rol: 'cliente',
   });
 
-  /**
-   * Efecto para cargar los datos del usuario cuando se edita
-   */
   useEffect(() => {
     if (usuario) {
       setFormData({
         nombre: usuario.nombre,
         email: usuario.email,
-        password: '', // La contraseña se deja vacía en edición
+        password: '', // No se muestra la contraseña en edición
         rol: usuario.rol,
       });
     }
   }, [usuario]);
 
-  /**
-   * Maneja el envío del formulario
-   * En creación: la contraseña es obligatoria
-   * En edición: la contraseña es opcional
-   */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Validar que la contraseña esté presente en creación
-    if (!formData.password && !usuario) {
-      alert('La contraseña es obligatoria');
+    if (!usuario && !formData.password) {
+      alert('La contraseña es obligatoria para usuarios nuevos.');
       return;
     }
     onSave(formData);
@@ -56,9 +42,8 @@ export default function UsuarioForm({ usuario, onSave, onCancel }: UsuarioFormPr
   return (
     <form onSubmit={handleSubmit}>
       <div className="row">
-        {/* Campo: Nombre */}
         <div className="col-12 col-md-6 mb-3">
-          <label className="form-label fw-semibold">Nombre</label>
+          <label className="form-label fw-semibold">Nombre <span className="text-danger">*</span></label>
           <input
             type="text"
             className="form-control"
@@ -66,12 +51,12 @@ export default function UsuarioForm({ usuario, onSave, onCancel }: UsuarioFormPr
             value={formData.nombre}
             onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
             required
+            disabled={saving}
           />
         </div>
 
-        {/* Campo: Email */}
         <div className="col-12 col-md-6 mb-3">
-          <label className="form-label fw-semibold">Email</label>
+          <label className="form-label fw-semibold">Email <span className="text-danger">*</span></label>
           <input
             type="email"
             className="form-control"
@@ -79,43 +64,46 @@ export default function UsuarioForm({ usuario, onSave, onCancel }: UsuarioFormPr
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             required
+            disabled={saving || !!usuario} // No se puede cambiar email en edición
           />
         </div>
 
-        {/* Campo: Contraseña */}
         <div className="col-12 col-md-6 mb-3">
           <label className="form-label fw-semibold">
-            {usuario ? 'Nueva contraseña (opcional)' : 'Contraseña'}
+            {usuario ? 'Nueva contraseña (opcional)' : 'Contraseña *'}
           </label>
           <input
             type="password"
             className="form-control"
-            placeholder={usuario ? 'Dejar vacío para mantener' : 'Contraseña...'}
+            placeholder={usuario ? 'Dejar vacío para mantener' : 'Mínimo 6 caracteres'}
             value={formData.password}
             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-            required={!usuario} // Solo obligatorio en creación
+            required={!usuario}
+            disabled={saving}
+            minLength={6}
           />
         </div>
 
-        {/* Campo: Rol */}
         <div className="col-12 col-md-6 mb-3">
           <label className="form-label fw-semibold">Rol</label>
           <select
             className="form-select"
             value={formData.rol}
             onChange={(e) => setFormData({ ...formData, rol: e.target.value as 'admin' | 'cliente' })}
+            disabled={saving}
           >
             <option value="cliente">Cliente</option>
             <option value="admin">Administrador</option>
           </select>
         </div>
       </div>
-      {/* Botones de acción */}
       <div className="d-flex gap-2">
-        <button type="submit" className="btn" style={{ backgroundColor: '#6f42c1', color: 'white' }}>
-          <i className="bi bi-save me-1"></i> Guardar
+        <button type="submit" className="btn" style={{ backgroundColor: '#6f42c1', color: 'white' }} disabled={saving}>
+          <i className="bi bi-save me-1"></i> {saving ? 'Guardando...' : 'Guardar'}
         </button>
-        <button type="button" className="btn btn-secondary" onClick={onCancel}>Cancelar</button>
+        <button type="button" className="btn btn-secondary" onClick={onCancel} disabled={saving}>
+          Cancelar
+        </button>
       </div>
     </form>
   );
