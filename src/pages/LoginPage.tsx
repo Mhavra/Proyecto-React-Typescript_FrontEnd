@@ -1,4 +1,3 @@
-// src/pages/LoginPage.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -13,14 +12,15 @@ export default function LoginPage() {
   const { login, user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  // 🔥 Efecto que escucha cambios en el usuario y redirige según su rol
   useEffect(() => {
     if (isAuthenticated && user) {
       console.log('👤 Usuario autenticado:', user);
       console.log('🎯 Rol del usuario:', user.rol);
       if (user.rol === 'admin') {
+        console.log('🚀 Redirigiendo a /dashboard');
         navigate('/dashboard');
       } else {
+        console.log('🚀 Redirigiendo a / (cliente)');
         navigate('/');
       }
     }
@@ -35,7 +35,6 @@ export default function LoginPage() {
       if (!success) {
         setError('Credenciales incorrectas. Verifica tu email y contraseña.');
       }
-      // ✅ Si el login es exitoso, el useEffect se encarga de la redirección
     } catch (err: any) {
       const errorCode = err.code;
       if (errorCode === 'auth/user-not-found') {

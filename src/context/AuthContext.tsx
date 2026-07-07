@@ -9,21 +9,18 @@ import {
   onAuthStateChanged,
   User as FirebaseUser,
 } from 'firebase/auth';
-import { getDocument, getCollection } from '@/services/firestoreService';
+import { getDocument } from '@/services/firestoreService';
 import { Usuario, AuthContextType } from '@/interfaces';
 
-const getUsuarioFromFirestore = async (uid: string, email?: string): Promise<Usuario | null> => {
+const getUsuarioFromFirestore = async (uid: string): Promise<Usuario | null> => {
   try {
-    // Buscar por UID (el documento tiene ID = uid)
-    const userDoc = await getDocument<Usuario>('usuarios', uid);
-    if (userDoc) return userDoc;
-    
-    // Si no, buscar por email
-    if (email) {
-      const usuarios = await getCollection<Usuario>('usuarios');
-      const encontrado = usuarios.find(u => u.email === email);
-      return encontrado || null;
+    // 🔥 Ahora busca en la colección 'usuario' (singular) porque así está en Firestore
+    const userDoc = await getDocument<Usuario>('usuario', uid);
+    if (userDoc) {
+      console.log('✅ Usuario encontrado en Firestore:', userDoc);
+      return userDoc;
     }
+    console.warn('⚠️ No se encontró documento en Firestore para UID:', uid);
     return null;
   } catch (error) {
     console.error('Error al obtener usuario de Firestore:', error);
@@ -38,14 +35,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Función que mapea el usuario de Firebase con el rol de Firestore
   const mapFirebaseUser = async (firebaseUser: FirebaseUser | null): Promise<Usuario | null> => {
     if (!firebaseUser) return null;
     
-    let userData = await getUsuarioFromFirestore(firebaseUser.uid, firebaseUser.email || undefined);
+    let userData = await getUsuarioFromFirestore(firebaseUser.uid);
     
-    // Si no existe en Firestore, crear uno por defecto (cliente)
     if (!userData) {
+      console.log('🆕 Creando usuario por defecto (cliente) para:', firebaseUser.email);
       userData = {
         id: firebaseUser.uid,
         nombre: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Usuario',
@@ -56,7 +52,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return userData;
   };
 
-  // Escuchar cambios de autenticación (persistencia de sesión)
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       const mapped = await mapFirebaseUser(firebaseUser);
@@ -67,14 +62,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  // Función de login (espera a que el usuario esté completamente mapeado)
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      // Esperamos a que se obtenga el usuario con rol de Firestore
       const mapped = await mapFirebaseUser(userCredential.user);
       setUser(mapped);
       setIsAuthenticated(true);
+      console.log('🔐 Login exitoso, usuario:', mapped);
       return true;
     } catch (error) {
       console.error('Login error:', error);
