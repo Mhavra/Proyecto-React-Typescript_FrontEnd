@@ -1,83 +1,84 @@
-/**
- * PRODUCTOS PAGE - Gestión de productos
- * 
- * Funcionalidades:
- * - Listado de productos con búsqueda
- * - Crear, editar y eliminar productos
- * 
- * @page /productos
- */
-
+// src/pages/ProductosPage.tsx
 'use client';
 
-import { useState } from 'react';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
-import { storage, STORAGE_KEYS } from '@/services/localStorageService';
+import { useState, useEffect } from 'react';
+import { getCollection, addDocument, updateDocument, deleteDocument } from '@/services/firestoreService';
 import { Producto } from '@/interfaces';
 import SearchBar from '@/components/common/SearchBar';
 import ProductoForm from '@/components/productos/ProductForm';
 import ProductoList from '@/components/productos/ProductList';
 
 export default function ProductosPage() {
-  const [productos, setProductos] = useLocalStorage<Producto[]>(STORAGE_KEYS.PRODUCTOS, []);
+  const [productos, setProductos] = useState<Producto[]>([]);
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Producto | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  /**
-   * Filtra productos por nombre o categoría
-   */
+  const cargarProductos = async () => {
+    try {
+      setLoading(true);
+      const data = await getCollection<Producto>('productos');
+      setProductos(data);
+      setError('');
+    } catch (err) {
+      setError('Error al cargar productos');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    cargarProductos();
+  }, []);
+
   const filteredProductos = productos.filter(p =>
     p.nombre.toLowerCase().includes(search.toLowerCase()) ||
     p.categoria.toLowerCase().includes(search.toLowerCase())
   );
 
-  /**
-   * Maneja la creación/edición de un producto
-   */
-  const handleSave = (producto: Omit<Producto, 'id'>) => {
-    if (editingProduct) {
-      // Editar
-      storage.updateItem<Producto>(STORAGE_KEYS.PRODUCTOS, editingProduct.id, producto);
-      setProductos(storage.get<Producto>(STORAGE_KEYS.PRODUCTOS));
-    } else {
-      // Crear
-      storage.addItem<Producto>(STORAGE_KEYS.PRODUCTOS, producto);
-      setProductos(storage.get<Producto>(STORAGE_KEYS.PRODUCTOS));
+  const handleSave = async (producto: Omit<Producto, 'id'>) => {
+    try {
+      if (editingProduct) {
+        await updateDocument('productos', editingProduct.id, producto);
+      } else {
+        await addDocument('productos', producto);
+      }
+      await cargarProductos();
+      setShowForm(false);
+      setEditingProduct(null);
+    } catch (err) {
+      setError('Error al guardar producto');
     }
-    setShowForm(false);
-    setEditingProduct(null);
   };
 
-  /**
-   * Maneja la edición de un producto
-   */
   const handleEdit = (producto: Producto) => {
     setEditingProduct(producto);
     setShowForm(true);
   };
 
-  /**
-   * Maneja la eliminación de un producto
-   */
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: string) => {
     if (confirm('¿Eliminar este producto?')) {
-      storage.deleteItem<Producto>(STORAGE_KEYS.PRODUCTOS, id);
-      setProductos(storage.get<Producto>(STORAGE_KEYS.PRODUCTOS));
+      try {
+        await deleteDocument('productos', id);
+        await cargarProductos();
+      } catch (err) {
+        setError('Error al eliminar producto');
+      }
     }
   };
 
-  /**
-   * Cancela el formulario
-   */
   const handleCancel = () => {
     setShowForm(false);
     setEditingProduct(null);
   };
 
+  if (loading) return <div className="text-center py-5">Cargando productos...</div>;
+
   return (
     <div>
-      {/* Header con título y botón de nuevo producto */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h4 className="fw-bold mb-0">Productos</h4>
         <button
@@ -89,14 +90,14 @@ export default function ProductosPage() {
         </button>
       </div>
 
-      {/* Barra de búsqueda */}
+      {error && <div className="alert alert-danger">{error}</div>}
+
       <SearchBar
         placeholder="Buscar productos por nombre o categoría..."
         value={search}
         onChange={setSearch}
       />
 
-      {/* Formulario de producto (se muestra en creación/edición) */}
       {showForm && (
         <div className="card shadow-sm mb-4">
           <div className="card-body">
@@ -112,7 +113,6 @@ export default function ProductosPage() {
         </div>
       )}
 
-      {/* Lista de productos */}
       <ProductoList
         productos={filteredProductos}
         onEdit={handleEdit}

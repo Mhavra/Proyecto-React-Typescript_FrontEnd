@@ -1,5 +1,5 @@
 // src/pages/_app.tsx
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate} from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import PrivateRoute from '@/components/common/PrivateRoute';
 import AdminLayout from '@/components/common/Layout';
@@ -16,36 +16,16 @@ import PedidosPage from '@/pages/PedidosPage';
 import ConsultasPage from '@/pages/ConsultasPage';
 import UsuariosPage from '@/pages/UsuariosPage';
 
-import { storage, STORAGE_KEYS } from '@/services/localStorageService';
-import { useEffect } from 'react';
-import { defaultProducts } from '@/data/defaultProducts';
-import { Producto } from '@/interfaces';
-
 import '../styles/globals.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
-
 function AppRoutes() {
   const { user, logout } = useAuth();
-  const navigate = useNavigate();
-
-  // Inicializar productos por defecto
-  useEffect(() => {
-    const products = storage.get<Producto>(STORAGE_KEYS.PRODUCTOS);
-    if (products.length === 0) {
-      storage.setItem(STORAGE_KEYS.PRODUCTOS, defaultProducts);
-    }
-  }, []);
-
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
 
   return (
     <Routes>
-      {/* Rutas públicas (accesibles sin autenticación) */}
+      {/* Rutas públicas */}
       <Route path="/" element={<TiendaPage />} />
       <Route path="/novedades" element={<NovedadesPage />} />
       <Route path="/servicio-cliente" element={<ServicioClientePage />} />
@@ -114,7 +94,6 @@ function AppRoutes() {
           </PrivateRoute>
         }
       />
-      {/* Ruta de fallback: redirige a la tienda */}
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );

@@ -1,91 +1,93 @@
-/**
- * AUTH CONTEXT - Contexto de autenticación
- * 
- * Maneja el estado del usuario autenticado y proporciona
- * funciones de login y logout a toda la aplicación.
- * 
- * @module context/AuthContext
- */
-
-// src/context/AuthContext.tsx (actualizado)
+// src/context/AuthContext.tsx
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { auth } from '@/lib/firebase';
+import {
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  User as FirebaseUser,
+} from 'firebase/auth';
+import { getDocument, getCollection } from '@/services/firestoreService';
 import { Usuario, AuthContextType } from '@/interfaces';
-import { storage, STORAGE_KEYS } from '@/services/localStorageService';
 
-// Creación del contexto
+const getUsuarioFromFirestore = async (uid: string, email?: string): Promise<Usuario | null> => {
+  try {
+    // Buscar por UID (el documento tiene ID = uid)
+    const userDoc = await getDocument<Usuario>('usuarios', uid);
+    if (userDoc) return userDoc;
+    
+    // Si no, buscar por email
+    if (email) {
+      const usuarios = await getCollection<Usuario>('usuarios');
+      const encontrado = usuarios.find(u => u.email === email);
+      return encontrado || null;
+    }
+    return null;
+  } catch (error) {
+    console.error('Error al obtener usuario de Firestore:', error);
+    return null;
+  }
+};
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-/**
- * Usuarios por defecto para inicializar la aplicación
- */
-const DEFAULT_USERS: Usuario[] = [
-  { id: 1, nombre: 'Administrador', email: 'admin@frenesi.cl', password: '123456', rol: 'admin' },
-  { id: 2, nombre: 'Cliente Demo', email: 'cliente@frenesi.cl', password: '123456', rol: 'cliente' },
-];
-
-/**
- * Provider del contexto de autenticación
- * 
- * @param props.children - Componentes hijos que tendrán acceso al contexto
- */
 export function AuthProvider({ children }: { children: ReactNode }) {
-  // Estado del usuario autenticado
   const [user, setUser] = useState<Usuario | null>(null);
-  // Flag de autenticación
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  // Estado de carga (para evitar parpadeos)
   const [loading, setLoading] = useState(true);
 
-  /**
-   * Efecto para cargar la sesión al iniciar la aplicación
-   * Busca en localStorage la sesión activa
-   */
-  useEffect(() => {
-    // Cargar sesión desde localStorage    
-    const sessions = storage.get<{ userId: number }>(STORAGE_KEYS.SESSION);
-    if (sessions.length > 0) {
-      const session = sessions[0];
-      // Buscar el usuario correspondiente al ID de la sesión
-      const users = storage.get<Usuario>(STORAGE_KEYS.USUARIOS);
-      const foundUser = users.find(u => u.id === session.userId);
-      if (foundUser) {
-        setUser(foundUser);
-        setIsAuthenticated(true);
-      }
+  // Función que mapea el usuario de Firebase con el rol de Firestore
+  const mapFirebaseUser = async (firebaseUser: FirebaseUser | null): Promise<Usuario | null> => {
+    if (!firebaseUser) return null;
+    
+    let userData = await getUsuarioFromFirestore(firebaseUser.uid, firebaseUser.email || undefined);
+    
+    // Si no existe en Firestore, crear uno por defecto (cliente)
+    if (!userData) {
+      userData = {
+        id: firebaseUser.uid,
+        nombre: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Usuario',
+        email: firebaseUser.email || '',
+        rol: 'cliente',
+      };
     }
-    setLoading(false);
+    return userData;
+  };
+
+  // Escuchar cambios de autenticación (persistencia de sesión)
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      const mapped = await mapFirebaseUser(firebaseUser);
+      setUser(mapped);
+      setIsAuthenticated(!!mapped);
+      setLoading(false);
+    });
+    return () => unsubscribe();
   }, []);
 
+  // Función de login (espera a que el usuario esté completamente mapeado)
   const login = async (email: string, password: string): Promise<boolean> => {
-    // Obtener lista de usuarios
-    let users = storage.get<Usuario>(STORAGE_KEYS.USUARIOS);
-    // Si no hay usuarios, crear los usuarios por defecto
-    if (users.length === 0) {
-      storage.setItem(STORAGE_KEYS.USUARIOS, DEFAULT_USERS);
-      users = DEFAULT_USERS;
-    }
-    // Buscar usuario por email y contraseña
-    const foundUser = users.find(u => u.email === email && u.password === password);
-    if (foundUser) {
-      setUser(foundUser);
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      // Esperamos a que se obtenga el usuario con rol de Firestore
+      const mapped = await mapFirebaseUser(userCredential.user);
+      setUser(mapped);
       setIsAuthenticated(true);
-      // Guardar sesión
-        storage.setItem(STORAGE_KEYS.SESSION, [{ userId: foundUser.id }]);
       return true;
+    } catch (error) {
+      console.error('Login error:', error);
+      return false;
     }
-    return false;
   };
 
-  const logout = () => {
+  const logout = async (): Promise<void> => {
+    await signOut(auth);
     setUser(null);
     setIsAuthenticated(false);
-    // Eliminar sesión (borrar todos los registros de sesión)
-    storage.setItem(STORAGE_KEYS.SESSION, []);
   };
-  
-  // Mostrar loading mientras se verifica la sesión
+
   if (loading) {
     return <div className="text-center py-5">Cargando sesión...</div>;
   }
@@ -99,8 +101,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth debe usarse dentro de AuthProvider');
+  if (!context) {
+    throw new Error('useAuth must be used within AuthProvider');
   }
   return context;
 }
